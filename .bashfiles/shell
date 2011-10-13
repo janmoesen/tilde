@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Shell options, environment variables and readline settings
+# =============================================================================
+
+# Globbing and completion
+# -----------------------------------------------------------------------------
+# Case-insensitive globbing.
+shopt -s nocaseglob;
+
+# Do not overwrite files when redirecting using ">".
+# Note that you can still override this with ">|".
+set -o noclobber;
+
+# Prefer the Queen's English and use UTF-8.
+export LC_ALL='en_GB.UTF-8';
+export LANG='en_GB';
+
+# History
+# -----------------------------------------------------------------------------
+# Keep a reasonably long history.
+export HISTSIZE=4096;
+
+# Keep even more history lines inside the file, so we can still look up
+# previous commands without needlessly cluttering the current shell's history.
+export HISTFILESIZE=16384;
+
+# When executing the same command twice or more in a row, only store it once.
+export HISTCONTROL=ignoredups;
+
+# Keep track of the time the commands were executed.
+# The xterm colour escapes require special care when piping; e.g. "| less -R".
+export HISTTIMEFORMAT=$'\e[1;30m%Y/%m/%d %H:%M:%S\e[0m  ';
+
+# ANSI colours and font properties for xterm
+# -----------------------------------------------------------------------------
+# See http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
+# Using "tput" would be more portable, but this is slightly faster. I used to
+# use "tput setaf 1" etc., so maybe I will change it back some day.
+let i=0;
+for color in BLACK RED GREEN YELLOW BLUE MAGENTA CYAN WHITE '' DEFAULT; do
+	if [ -n "$color" ]; then
+		printf -v "FG_$color" $'\e[%dm' $((30 + $i));
+		printf -v "BG_$color" $'\e[%dm' $((40 + $i));
+	fi;
+	let i++;
+done;
+let i=0;
+for style in RESET BOLD '' '' UNDERLINE BLINK '' REVERSE HIDDEN; do
+	if [ -n "$style" ]; then
+		printf -v "FONT_$style" $'\e[%dm' $i;
+		[ "$style" != 'RESET' ] && printf -v "FONT_NOT_$style" $'\e[%dm' $(($i + 20));
+	fi;
+	let i++;
+done;
+unset i color style;
+# "Not bold" is not \e[21m, but \e[22m. ("2" means "faint" on some terminals.)
+export FONT_NOT_BOLD=$'\e[22m';
+# Reset the font style, but not the color. (Unlike $FONT_RESET.)
+export FONT_NORMAL="${FONT_NOT_BOLD}${FONT_NOT_UNDERLINE}${FONT_NOT_BLINK}${FONT_NOT_REVERSE}${FONT_NOT_HIDDEN}";

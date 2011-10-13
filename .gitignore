@@ -1,0 +1,11 @@
+# Ctags file
+tags
+
+# Vim swap files
+*.sw?
+
+# Vim session files
+*.vimsession
+
+# OS X Finder turdlets
+*.DS_Store

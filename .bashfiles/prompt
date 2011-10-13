@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# Shell prompt settings
+# =============================================================================
+
+# Set the terminal's title.
+function title () {
+	echo -n $'\e]0;'"$@"$'\a';
+}
+
+# Display the process tree inside the prompt for shells that are not at the top
+# level (as determined by $SHLVL).
+function __prompt_display_process_tree () {
+	[ ${SHLVL:-0} -gt 1 ] && echo " (${FONT_REVERSE}level ${SHLVL}${FONT_NOT_REVERSE}: $(process-tree))";
+}
+
+# Display an error message inside the prompt when the previous command has
+# failed. If it was terminated using a signal, display the signal's name. For
+# example, terminating a command using Ctrl+C would display: "[ SIGINT ]".
+# "Normal" error codes display the number, e.g. "[ Error 13 ]".
+function __prompt_display_error () {
+	local ret="$?";
+	if [ "$ret" -eq 0 ]; then
+		local msg="${FG_GREEN}:-)";
+	else
+		local msg="Error $ret";
+
+		# Replace predefined exit codes with their message.
+		if [ "$ret" -eq 127 ]; then
+			msg='Error 127: command not found';
+		elif [ "$ret" -eq 126 ]; then
+			msg='Error 126: permission denied';
+		elif [ "$ret" -ge 129 ]; then
+			# Replace exit codes 129 and up by their signal name.
+			# See http://www.faqs.org/docs/abs/HTML/exitcodes.html for more.
+			set -- $(trap -l);
+			while [ $# -ge 2 ]; do
+				local num="${1%)}";
+				local name="$2";
+				shift 2;
+				if [ "$ret" -eq $((128 + $num)) ]; then
+					msg="$name";
+					break;
+				fi;
+			done;
+		fi;
+		msg="${FG_RED}${FONT_REVERSE}$msg${FONT_NOT_REVERSE}";
+	fi;
+
+	# Show the error message.
+	echo -ne "${FONT_BOLD}$msg${FONT_RESET}${__prompt_color}";
+	return "$ret";
+}
+
+# More advanced prompt.
+if [ "$USER" = 'root' ]; then
+	__prompt_color="${FONT_BOLD}${FG_RED}";
+	__prompt_title_user_char='#';
+else
+	# You can override this in ~/.dotfiles/bash/extra
+	__prompt_color="${FG_CYAN}";
+	__prompt_title_user_char=':';
+fi;
+[[ "$TERM" =~ ^xterm ]] && export PS1=$'\e]0;'"${HOSTNAME%.local}${__prompt_title_user_char} "$'\\W \a'"$PS1";
+export PS1="\${__prompt_color}-----[ \\t ]$(__prompt_display_process_tree) (!\\!) [ \$(__prompt_display_error) ] \\u@\\h \\w \$(git-show-branch)\\e[m\\n\\$ ";

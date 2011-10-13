@@ -1,0 +1,12 @@
+# Flush output immediately, even when piped.
+--flush
+
+# HTML templates.
+--type-set=tpl=.tpl
+--type-add=html=.tpl
+
+# PHP includes.
+--type-add=php=inc
+
+# Generated documentation.
+--ignore-dir=docs

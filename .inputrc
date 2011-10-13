@@ -1,0 +1,47 @@
+# History
+# -----------------------------------------------------------------------------
+# Up and down arrows
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+# Expand "!" history when pressing space. (Disabled because it annoyed me.)
+# Space magic-space;
+
+# Meta-Delete
+"\e[3;3~": kill-word
+
+# Delete for wonky terminals
+"\e[3~": delete-char
+
+# Ctrl/Meta arrow keys
+"\e[1;5D": backward-word
+"\e[1;3D": backward-word
+"\e[1;5C": forward-word
+"\e[1;3C": forward-word
+
+# Escape keys
+"\e[5D": backward-word
+"\e\e[D": backward-word
+"\e[5C": forward-word
+"\e\e[C": forward-word
+
+# Flip through autocompletion matches with Shift-Tab
+"\e[Z": menu-complete
+
+set match-hidden-files off
+set page-completions off
+set completion-query-items 350
+set show-all-if-ambiguous on
+
+# Use visual bell instead of sound
+set bell-style visible
+
+# Show extra information when completing
+set visible-stats on
+
+# Auto-complete files with the wrong case
+set completion-ignore-case on
+
+# Bind tab to cycle through full completions, instead of the longest common match.
+# "\C-I": menu-complete
+

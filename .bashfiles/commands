@@ -1,0 +1,714 @@
+#!/bin/bash
+
+# Settings, functions and aliases for commands
+# =============================================================================
+
+# Paths and binaries
+# -----------------------------------------------------------------------------
+paths=(
+	# Private "bin"
+	"$HOME/bin"
+	# MacPorts
+	/opt/local/{,s}bin
+	# System
+	/{,s}bin
+	/usr/{,s}bin
+	# X binaries
+	/usr/X11/bin
+);
+printf -v PATH "%s:" "${paths[@]}";
+export PATH="${PATH%:}";
+unset paths;
+
+# Override MacPorts' SSH binaries.
+for x in /usr/bin/ssh*; do
+	[ -x "$x" ] && hash -p "$x" "$(basename "$x")";
+done;
+
+# OS X's file system is case-insensitive by default, so use aliases to get
+# "GET"/"HEAD"/… working. (Otherwise "HEAD" would execute "/usr/bin/head".)
+[[ "$OSTYPE" =~ ^darwin ]] && for method in GET HEAD POST PUT DELETE TRACE OPTIONS; do
+	alias "$method"="/usr/bin/lwp-request -m $method";
+done;
+
+# Confirm before overwriting
+# -----------------------------------------------------------------------------
+# I know it is bad practice to override the default commands, but this is for
+# my own safety. If you really want the original "instakill" versions, you can
+# still use "command rm" or "/bin/rm" inside your commands, aliases, functions
+# or scripts.
+alias cp='cp -i';
+alias mv='mv -i';
+alias rm='rm -i';
+
+# Editors and pagers
+# -----------------------------------------------------------------------------
+alias nano='nano -w';
+alias pico='nano';
+alias vi='vim';
+export EDITOR='vim';
+
+export PAGER='less --quit-if-one-screen --no-init --ignore-case --RAW-CONTROL-CHARS --quiet --dumb';
+# Make "less" transparently unpack archives etc.
+if [ -x /usr/bin/lesspipe ]; then
+	eval $(/usr/bin/lesspipe);
+elif type -t lesspipe.sh > /dev/null; then
+	# MacPorts recommended "/opt/local/bin/lesspipe.sh", but this is more
+	# portable for people that have it in another directory in their $PATH.
+	eval $(lesspipe.sh);
+fi;
+
+# Edit and reload the profile.
+function pro {
+	vi +3tabn -p ~/.bash_profile ~/.bashfiles/{shell,commands,prompt,extra};
+	source ~/.bash_profile;
+}
+
+# Colors
+# -----------------------------------------------------------------------------
+# Always use colour output for "ls".
+if [[ "$OSTYPE" =~ ^darwin ]]; then
+	alias ls='command ls -G';
+else
+	alias ls='command ls --color';
+	export LS_COLORS='no=00:fi=00:di=01;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.ogg=01;35:*.mp3=01;35:*.wav=01;35:';
+fi;
+
+# Autocompletion
+# -----------------------------------------------------------------------------
+complete -d cd pushd rmdir;
+complete -u finger mail;
+complete -v set unset;
+[ -d ~/.bashfiles/completion ] && for file in ~/.bashfiles/completion/*; do
+	[ -f "$file" ] && source "$file";
+done;
+unset file;
+
+# Utilities
+# -----------------------------------------------------------------------------
+# Open the manual page for the last command you executed.
+function lman {
+	set -- $(fc -nl -1);
+	while [ $# -gt 0 -a '(' "sudo" = "$1" -o "-" = "${1:0:1}" ')' ]; do
+		shift;
+	done;
+	cmd="$(basename "$1")";
+	man "$cmd" || help "$cmd";
+}
+
+# Clipboard access. I created these aliases to have the same command on
+# Cygwin, Linux and OS X.
+if type -t pbpaste >/dev/null; then
+	alias getclip='pbpaste';
+	alias putclip='pbcopy';
+elif type -t xclip >/dev/null; then
+	alias getclip='xclip --out';
+	alias putclip='xclip --in';
+fi;
+
+# Make "ctags" recurse by default.
+alias ctags='ctags --exclude={docs,cache,tiny_mce,layout} --recurse';
+
+# OS X has no "md5sum", so use "md5" as a fall-back.
+type -t md5sum > /dev/null || alias md5sum='md5';
+
+# Version control
+# -----------------------------------------------------------------------------
+# Use "colordiff" or "highlight" to colour diffs.
+if type -t colordiff > /dev/null; then
+	alias difflight='colordiff | less -XFIRd';
+elif type -t highlight > /dev/null; then
+	alias difflight='highlight --dark-red ^-.* | highlight --dark-green ^+.* | highlight --yellow ^Only.* | highlight --yellow ^Files.*differ$ | less -XFIRd';
+else
+	alias difflight='less -XFIRd';
+fi;
+
+# Git autocompletion.
+# TODO: move this to a separate .bashfiles/completion/git or some such.
+[ -f ~/git-completion.bash ] && source ~/git-completion.bash;
+
+# Show the current Git branch, if any.
+# (This is useful in the shell prompt.)
+function git-show-branch {
+	branch="$(git symbolic-ref -q HEAD 2>/dev/null)";
+	ret=$?;
+	case $ret in
+		0) echo "(${branch##*/})";;
+		1) echo '(no branch)';;
+		128) echo -n;;
+		*) echo "[unknown git exit code: $ret]";;
+	esac;
+	return $ret;
+}
+
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# THE FUNCTIONS BELOW SHOULD BE MOVED TO SEPARATE SCRIPTS INSIDE ~/bin.
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
+# Utilities
+# -----------------------------------------------------------------------------
+# Show a unified diff, colourised if possible and paged if necessary.
+function udiff {
+	type -t colordiff > /dev/null \
+		&& local command=colordiff \
+		|| local command=diff;
+	"$command" -wU4 -x .svn "$@" | less -XFIRd;
+	return ${PIPESTATUS[0]};
+}
+
+# Move the given file(s) to the Trash.
+function trash {
+	local path;
+	for path in "$@"; do
+		# Make relative paths "absolutey".
+		[ "${path:0:1}" = '/' ] || path="$PWD/$1";
+
+		# Execute the AppleScript to nudge Finder.
+		echo "$(cat <<-EOD
+			tell application "Finder"
+				delete POSIX file "${path//\"/\"}"
+			end
+		EOD)" | osascript;
+	done;
+}
+
+# Show the given file(s) in the Finder.
+function show {
+	# Default to the current directory.
+	[ $# -eq 0 ] && set -- .;
+
+	# Build the array of paths for AppleScript.
+	local path paths=();
+	for path in "$@"; do
+		# Make sure each path exists.
+		if ! [ -e "$path" ]; then
+			echo "show: $path: No such file or directory";
+			continue;
+		fi;
+
+		# Crappily re-implement "readlink -f" ("realpath") for Darwin.
+		# (The "cd ... > /dev/null" hides CDPATH noise.)
+		[ -d "$path" ] \
+			&& path="$(cd "$path" > /dev/null && pwd)" \
+			|| path="$(cd "$(dirname "$path")" > /dev/null && \
+			           echo "$PWD/$(basename "$path")")";
+
+		# Use the "POSIX file" AppleScript syntax.
+		paths+=("POSIX file \"${path//\"/\"}\"");
+	done;
+	[ "${#paths[@]}" -eq 0 ] && return;
+
+	# Group all output to pipe through osacript.
+	{
+		echo 'tell application "Finder"';
+		echo -n 'select {'; # "reveal" would select only the last file.
+
+		for ((i = 0; i < ${#paths[@]}; i++)); do
+			echo -n "${paths[$i]}";
+			[ $i -lt $(($# - 1)) ] && echo -n ', '; # Ugly array.join()...
+		done;
+
+		echo '}';
+		echo 'activate';
+		echo 'end tell';
+	} | osascript;
+}
+
+# Backups
+# -----------------------------------------------------------------------------
+# Back up the given files and directories using an incremental backup
+# that looks like a full backup, like Time Machine does.
+function backup () {(
+	# Backup format.
+	local backup_dir="$HOME/backups";
+	local date_format='%Y-%m-%d-%H-%M-%S';
+
+	# Usage.
+	if [ $# -eq 0 -o "$1" = '--help' ] || [ $# -eq 1 -a "$1" = '--' ]; then
+		echo 'Usage: backup [[USER@]HOST:]FILE...';
+		echo;
+		echo "Back up the given files and directories to $backup_dir/$(date +"$date_format")";
+		[ "$1" = '--' ] && shift;
+		[ $# -gt 0 ];
+		exit $?;
+	fi;
+
+	# Skip the "enough with the options; it's files only from now on" delimiter "--".
+	[ "$1" = '--' ] && shift;
+
+	# Loop the command-line arguments.
+	local path i=0;
+	for path in "$@"; do
+		# Update the backup directory timestamp for each file being backed up.
+		local curr_date="$(date +"$date_format")";
+
+		# Check if this is a remote source.
+		! [[ "$path" =~ ^([^/]+):(.*) ]];
+		is_remote=$?;
+
+		# Determine the full source path, source location and target path.
+		# For local files, the source path and location are the same. For
+		# remote files, the location is [user@]host:path.
+		if [ $is_remote -eq 1 ]; then
+			# For SSH sources, use SSH to find the full path.
+			host="${BASH_REMATCH[1]}";
+			local source_path="$(ssh "$host" "$(printf "$(cat <<-'EOD'
+				host=%q;
+				path=%q;
+				if ! [ -z "$path" -o -e "$path" ]; then
+					echo "$host:$path does not exist." 1>&2;
+					exit 1;
+				fi;
+				{ [ -d "$path" ] && cd -- "$path" && pwd; } || { cd -- "$(dirname -- "$path")" && echo "$PWD/$(basename -- "$path")"; }
+			EOD)" "$host" "${BASH_REMATCH[2]}")")" || exit 1;
+			local source_location="$host:$source_path";
+			local source_path="/ssh=$host$source_path";
+		elif [ -z "$path" -o -e "$path" ]; then
+			# For local sources, go to the directory or the file's parent directory and use the working directory.
+			local source_path="$({ [ -d "$path" ] && cd -- "$path" && pwd; } || { cd -- "$(dirname -- "$path")" && echo "$PWD/$(basename -- "$path")"; })";
+			local source_location="$source_path";
+		else
+			echo "$path does not exist." 1>&2;
+			exit 1;
+		fi;
+
+		# Determine the target directory for the current backup.
+		local curr_backup="$backup_dir/$curr_date$source_path";
+		# if [ $is_remote -eq 1 ]; then
+		local curr_backup_dir="$(dirname "$curr_backup")";
+		local curr_backup_dir="$curr_backup";
+
+		# Check for previous backups.
+		local prev_backup='';
+		shopt -s nullglob;
+		for prev_backup in "$backup_dir/"*"$source_path"; do
+			:
+		done;
+
+# XXX debug delme
+for x in path is_remote source_path source_location curr_backup curr_backup_dir prev_backup; do printf $'%12s: "%s"\n' "$x" "${!x}"; done
+		# Back up using rsync, hard-linking unchanged files to the previous backup, if any.
+		mkdir -p "$curr_backup_dir";
+		if [ "$(basename "$source_path")" = "$path" ]; then
+			echo "Now backing up:  \"$path\"";
+		else
+			echo "Now backing up:  \"$path\" (\"$source_path\")";
+		fi;
+		echo "Backing up to:   \"$curr_backup\"";
+		if [ -z "$prev_backup" ]; then
+			echo 'Previous backup: (none)';
+			echo;
+			echo rsync --itemize-changes --archive -- "$source_location" "$curr_backup_dir";
+		else
+			echo "Previous backup: \"$prev_backup\"";
+			echo;
+			echo rsync --itemize-changes --archive --link-dest="$(dirname "$prev_backup")" -- "$source_location" "$curr_backup_dir"; # | sed '/\/\.svn\//d; /^cd+++++++ .*\/$/d';
+		fi;
+
+		# Print a blank line between two backups.
+		let i++;
+		[ $i -eq $# ] || echo;
+	done;
+)}
+
+function diff-to-backup () {(
+	local backup_dir="$HOME/backups";
+
+	for x in "${@:-.}"; do
+		full_path="$(php -r 'echo realpath($_SERVER["argv"][1]);' "$x")";
+
+		# Check for previous backups.
+		local prev_backup='';
+		shopt -s nullglob;
+		for prev_backup in "$backup_dir/"*"$full_path"; do
+			:
+		done;
+
+		if [ -z "$prev_backup" ]; then
+			echo "There are no backups of \"$x\"";
+			exit 1;
+		else
+			udiff -x .svn -r "$prev_backup" "$x";
+		fi;
+		echo;
+	done;
+)}
+
+# Processes
+# -----------------------------------------------------------------------------
+# Show a one-line process tree of the given process, defaulting to the current
+# shell. By specifying this as a function instead of a separate script, we
+# avoid the extra shell process.
+function process-tree {
+	pid="${1:-$$}";
+	orig_pid="$pid";
+	local commands=();
+	while [ "$pid" != "$ppid" ]; do
+		# Read the parent's process ID and the current process's command line.
+		{
+			read -d ' ' ppid;
+			read command;
+		} < <(ps c -p "$pid" -o ppid= -o command= | sed 's/^ *//');
+
+		# XXX This does not quite work yet with screen on OS x. Find out why.
+		# echo "PID: $pid // PPID: $ppid // CMD: $command" 1>&2;
+
+		# Stop when we have reached the first process, or an sshd/login process.
+		if [ -z "$ppid" -o "$ppid" -eq 0 -o "$ppid" -eq 1 -o "$command" = 'login' -o "$command" = 'sshd' ]; then
+			# Include screen/xterm as the "root" process.
+			if [ "$command" = 'screen' -o "$command" = 'xterm' ]; then
+				commands=("$command" "${commands[@]}");
+			fi;
+			break;
+		fi;
+
+		# Insert the command in the front of the process array.
+		commands=("$command" "${commands[@]}");
+
+		# Prepare for the next iteration.
+		pid="$ppid";
+		ppid=;
+	done;
+
+	# Hide the first bash process.
+	set -- "${commands[@]}";
+	if [ "$1" = '-bash' -o "$1" = 'bash' ]; then
+		shift;
+		commands=("$@");
+	fi;
+
+	# Print the tree with the specified separator.
+	separator='→';
+	output="$(IFS="$separator"; echo "${commands[*]}")";
+	echo "${output//$separator/ $separator }";
+}
+
+# Show the top 10 processes.
+function top10 {
+	# Default columns displayed by "top" on Debian Linux and Mac OS X:
+	#         1   2    3  4  5    6   7   8 9    10   11    12
+	# Linux:  PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND
+	# Darwin: PID COMMAND %CPU TIME #TH #WQ #PORTS #MREGS RPRVT RSHRD RSIZE VPRVT VSIZE PGRP PPID STATE UID FAULTS COW MSGSENT MSGRECV SYSBSD SYSMACH CSW PAGEINS USER
+	#         1   2       3    4    5   6   7      8      9     10    11    12    13    14   15   16    17  18     19  20      21      22     23      24  25      26
+	if [[ "$OSTYPE" =~ ^darwin ]]; then
+		# Mac OS X's top does not calculate the CPU usage when sampling only
+		# once. So, sample twice and only keep the output of the second
+		# sample. This makes it seem very slow, but them's the breaks.
+		local output="$(top -l 2 -n 10 -o CPU -stats PID,USER,CPU,VSIZE,RSIZE,RSHRD,STATE,TIME,COMMAND)";
+		output="$(tail -n "$(($(wc -l <<< "$output") / 2))" <<< "$output")";
+	else
+		# Debian's top (and possibly other Linux versions) does not allow
+		# requesting specific fields on the command line, so create a
+		# temporary .toprc somewhere and use that. The "fieldscur" below
+		# correspond to the "-stats" option for OS X's "top". See above.
+		local tmp_dir="$(mktemp -d -t "top10.$$.XXXX")";
+		cat > "$tmp_dir/.toprc" <<-EOD
+			RCfile for "top with windows"		# shameless braggin'
+			Id:a, Mode_altscr=0, Mode_irixps=1, Delay_time=3.000, Curwin=0
+			Def	fieldscur=AEKhiOQTWnMbcdfgjplrsuvyzX
+				winflags=62777, sortindx=10, maxtasks=0
+				summclr=1, msgsclr=1, headclr=3, taskclr=1
+		EOD
+		local output="$(HOME="$tmp_dir"; top -bn 1)";
+	fi;
+
+	# Output the result, and use "column" to align the process columns a bit
+	# better than "top" itself does. This does screw up the command names when
+	# they contain a space, e.g. "Chromium Helper" => "Chromium     Helper".
+	local pid_start_line="$(egrep -nm1 '^\s*PID' <<< "$output" || echo 65536)";
+	pid_start_line="${pid_start_line%:*}";
+	head -n $(($pid_start_line - 1)) <<< "$output";
+	tail -n +$pid_start_line <<< "$output" | head -n 11 | column -t;
+}
+
+# Sort the "du" output and use human-readable units.
+function duh {
+	du -sk "$@" | sort -n | while read size fname; do
+		for unit in KiB MiB GiB TiB PiB EiB ZiB YiB; do
+			if [ "$size" -lt 1024 ]; then
+				echo -e "${size} ${unit}\t${fname}";
+				break;
+			fi;
+			size=$((size/1024));
+		done;
+	done;
+}
+
+# Compare one or more URLs "before" and "after".
+function diff-url () {(
+	cd /tmp || return $?;
+	declare -a urls;
+	declare -a before;
+	declare -a after;
+
+	# Remember all URLs.
+	for url in "$@"; do
+		urls+=("$url");
+	done;
+
+	# Save all URLs to "before and after".
+	for curr in {before,after}; do
+		read -p "Press Enter to save $curr...";
+
+		for ((i = 0; i < ${#urls[@]}; i++)); do
+			url="${urls[$i]}";
+			num="$(printf '%02d' "$i")";
+			file="$curr-$num.html";
+			[ "$curr" = 'before' ] \
+				&& before+=("$file") \
+				|| after+=("$file");
+			wget -qO- "$url" | sed 's/m=[0-9]*//g; s/[0-9a-f]\{32\}//g; s/[0-9]* keer bekeken//' > "$file";
+			[ -z "$prev_x" ] && prev_x="$x";
+		done;
+	done;
+
+	# Loop through all URLs to diff their before and after.
+	for ((i = 0; i < ${#urls[@]}; i++)); do
+		url="${urls[$i]}";
+		num="$(printf '%02d' "$i")";
+		before="${before[$i]}";
+		after="${after[$i]}";
+		udiff --label="$url (before)" --label="$url (after)" "$before" "$after";
+		rm -f "$before" "$after";
+	done | colordiff | less -XFIRd;
+)}
+
+# Van Dale online dictionary look-up.
+function vd {
+	# Try to find the screen width. Make it a minimum of 40 so our awk
+	# patterns still match.
+	[ -z "$COLUMNS" ] && local COLUMNS="$(tput cols 2> /dev/null || echo 40)";
+	[ "$COLUMNS" -lt 40 ] && local COLUMNS=40;
+
+	# Dump the vandale.nl page. Because links does not support setting
+	# arbitrary headers or cookies, we hack the user agent string to include a
+	# newline and smuggle in our own Cookie: header.
+	lynx -dump -nolist -display_charset=UTF-8 -width="$COLUMNS" -useragent=$'Lynx\nCookie: country=nl' "http://www.vandale.nl/vandale/zoekService.do?selectedDictionary=nn&selectedDictionaryName=Nederlands&searchQuery=${*// /+}" |\
+		awk '
+			# This line is the first line after the word definition, so we
+			# can quit here.
+			/Gebruik dit woordenboek/ {
+				exit;
+			}
+
+			# Only print the interesting lines.
+			is_printing;
+
+			# Print everything after this line.
+			/Je hebt gezocht/ {
+				is_printing = 1;
+			}
+		';
+}
+
+# Edit the files found with the previous "ack" command using Vim (or the
+# default editor).
+function vack {
+	local cmd='';
+	if [ $# -eq 0 ]; then
+		cmd="$(fc -nl -1)";
+		cmd="${cmd:2}";
+	else
+		cmd='ack';
+		for x in "$@"; do
+			cmd="$cmd $(printf '%q' "$x")";
+		done;
+		echo "$cmd";
+	fi;
+	if [ "${cmd:0:4}" != 'ack ' ]; then
+		$cmd;
+		return $?;
+	fi;
+	declare -a files;
+	while read -r file; do
+		echo "$file";
+		files+=("$file");
+	done < <(bash -c "${cmd/ack/ack -l}");
+	"${EDITOR:-vim}" "${files[@]}";
+}
+
+# Convert the parameters or STDIN to lowercase.
+function lc {
+	if [ $# -eq 0 ]; then
+		tr '[:upper:]' '[:lower:]';
+	else
+		tr '[:upper:]' '[:lower:]' <<< "$@";
+	fi;
+}
+
+# Convert the parameters or STDIN to uppercase.
+function uc {
+	if [ $# -eq 0 ]; then
+		tr '[:lower:]' '[:upper:]';
+	else
+		tr '[:lower:]' '[:upper:]' <<< "$@";
+	fi;
+}
+
+# Use PHP's built-in support to encode and decode base64.
+function base64 {
+	if [ $# -eq 0 ]; then
+		 echo 'Usage: base64 [encode|decode] <string>';
+		 return;
+	fi;
+	local action='decode';
+	if [ "$1" = 'decode' ]; then
+		action='decode';
+		shift;
+	elif [ "$1" = 'encode' ]; then
+		action='encode';
+		shift;
+	fi;
+	echo "$@" | php -r "echo base64_$action(file_get_contents('php://stdin'));";
+	echo;
+}
+
+# Highlight STDIN based on PCRE patterns.
+function highlight {
+	local color=33;
+	local perl_regex='';
+	while [ $# -gt 0 ]; do
+		local brightness=1;
+		local param="$1";
+		if [ "${param:0:2}" = "--" ]; then
+			if [ "${param:2:5}" == "dark-" ]; then
+				brightness=0;
+				param="--${param:7}";
+			elif [ "${param:2:6}" == "light-" ]; then
+				brightness=1;
+				param="--${param:8}";
+			fi;
+			case "${param:2}" in
+				'black' | 'red' | 'green' | 'yellow' | 'blue' | 'magenta' | 'pink' | 'cyan' | 'white')
+					param="--color=${param:2}";
+					;;
+			esac;
+		fi;
+		if [[ "${param:0:8}" = '--color=' ]]; then
+			case ${param:8} in
+				'black')
+					color=30;;
+				'red')
+					color=31;;
+				'green')
+					color=32;;
+				'yellow')
+					color=33;;
+				'blue')
+					color=34;;
+				'magenta' | 'pink')
+					color=35;;
+				'cyan')
+					color=36;;
+				'white')
+					color=37;;
+				*)
+					echo default;;
+			esac
+			shift;
+		fi
+		perl_regex="$perl_regex;s@${1//@/\\@/}@$(echo -n $'\e['$brightness';'$color'm$&'$'\e[m')@g";
+		shift;
+	done;
+	perl -p -e "select(STDOUT); $| = 1; ${perl_regex:1}";
+}
+
+# Show what a given command really is. It is a combination of "type", "file"
+# and "ls". Unlike "which", it does not only take $PATH into account. This
+# means it works for aliases and hashes, too. (The name "whatis" was taken,
+# and I did not want to overwrite "which", hence "wtfis".)
+# The return value is the result of "type" for the last command specified.
+function wtfis {
+	local cmd type i=1 ret=0;
+	if [ $# -eq 0 ]; then
+		# Use "fc" to get the last command, and use that when no command
+		# was given as a parameter to "wtfis".
+		set -- $(fc -nl -1);
+		while [ $# -gt 0 -a '(' "sudo" = "$1" -o "-" = "${1:0:1}" ')' ]; do
+			# Ignore "sudo" and options ("-x" or "--bla").
+			shift;
+		done;
+		# Replace the positional parameter array with the last command name.
+		set -- "$1";
+	fi;
+	for cmd in "$@"; do
+		type="$(type "$cmd")";
+		ret=$?;
+		if [ $ret -eq 0 ]; then
+			# Try to get the physical path. This works for hashes and
+			# "normal" binaries.
+			local path="$(type -p "$cmd")";
+			if [ -z "$path" ]; then
+				# Show the output from "type" without ANSI escapes.
+				echo "${type//$'\e'/\\033}";
+
+				case "$(type -t "$cmd")" in
+					'alias')
+						local alias_="$(alias "$cmd")";
+						# The output looks like "alias foo='bar'"; so
+						# strip everything except the body.
+						alias_="${alias_#*\'}";
+						alias_="${alias_%\'}";
+						# Use "read" to process escapes. E.g. 'test\ it'
+						# will # be read as 'test it'. This allows for
+						# spaces inside command names.
+						read -d ' ' alias_ <<< "$alias_";
+						# Recurse and indent the output.
+						wtfis "$alias_" 2>&2 | sed 's/^/  /';
+						;;
+					'keyword' | 'builtin')
+						# Get the one-line description from the built-in
+						# help, if available. Note that this does not
+						# guarantee anything useful, though. Look at the
+						# output for "help set", for instance.
+						help "$cmd" 2> /dev/null | {
+							local buf line;
+							read -r line;
+							while read -r line; do
+								buf="$buf${line/.  */.} ";
+								if [[ "$buf" =~ \.\ $ ]]; then
+									echo "$buf";
+									break;
+								fi;
+							done;
+						};
+						;;
+				esac;
+			else
+				# For physical paths, get some more info.
+				# First, get the one-line description from the man page.
+				# ("col -b" gets rid of the backspaces used by OS X's man
+				# to get a "bold" font.)
+				man "$(basename "$path")" 2>/dev/null | col -b | \
+				awk '/^NAME$/,/^$/' | {
+					local buf line;
+					read -r line;
+					while read -r line; do
+						buf="$buf${line/.  */.} ";
+						if [[ "$buf" =~ \.\ $ ]]; then
+							echo "$buf";
+							break;
+						fi;
+					done;
+					[ -n "$buf" ] && echo "$buf";
+				}
+
+				# Then, combine the output "type" and "file".
+				local fileinfo="$(file "$path")";
+				echo "${type}${fileinfo/$path}";
+
+				# Finally, show it using "ls" and highlight the path.
+				local ls="$(command ls -dalF "$path")";
+				echo "${ls/$path/$'\e[7m'${path}$'\e[27m'}";
+			fi;
+		fi;
+
+		# Separate the output for all but the last command with blank lines.
+		[ $i -lt $# ] && echo;
+		let i++;
+	done;
+	return $ret;
+}
+complete -A command wtfis;
