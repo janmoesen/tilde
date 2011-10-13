@@ -60,7 +60,7 @@ fi;
 
 # Edit and reload the profile.
 function pro {
-	vi +3tabn -p ~/.bash_profile ~/.bashfiles/{shell,commands,prompt,extra};
+	vi +3tabn -p ~/.bash_profile ~/.bash/{shell,commands,prompt,extra};
 	source ~/.bash_profile;
 }
 
@@ -79,7 +79,7 @@ fi;
 complete -d cd pushd rmdir;
 complete -u finger mail;
 complete -v set unset;
-[ -d ~/.bashfiles/completion ] && for file in ~/.bashfiles/completion/*; do
+[ -d ~/.bash/completion ] && for file in ~/.bash/completion/*; do
 	[ -f "$file" ] && source "$file";
 done;
 unset file;
@@ -124,7 +124,7 @@ else
 fi;
 
 # Git autocompletion.
-# TODO: move this to a separate .bashfiles/completion/git or some such.
+# TODO: move this to a separate .bash/completion/git or some such.
 [ -f ~/git-completion.bash ] && source ~/git-completion.bash;
 
 # Show the current Git branch, if any.

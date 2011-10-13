@@ -57,7 +57,7 @@ if [ "$USER" = 'root' ]; then
 	__prompt_color="${FONT_BOLD}${FG_RED}";
 	__prompt_title_user_char='#';
 else
-	# You can override this in ~/.dotfiles/bash/extra
+	# You can override this in ~/.bash/extra
 	__prompt_color="${FG_CYAN}";
 	__prompt_title_user_char=':';
 fi;
