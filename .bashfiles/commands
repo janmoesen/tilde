@@ -216,6 +216,9 @@ function show {
 	} | osascript;
 }
 
+# Use "hd" for the canonical hex dump. (Some systems have this symlinked.)
+type -t hd > /dev/null || alias hd='hexdump -C';
+
 # Backups
 # -----------------------------------------------------------------------------
 # Back up the given files and directories using an incremental backup
