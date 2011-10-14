@@ -13,7 +13,7 @@
 	name = Jan Moesen
 	# My e-mail address can differ from repository to repository. The default
 	# e-mail address is specified as GIT_AUTHOR_EMAIL and GIT_COMMITTER_EMAIL
-	# in ~/.bashfiles/extra.
+	# in ~/.bash/extra.
 
 [pretty]
 	concise = %C(yellow)%h%C(reset) %s %C(bold black)(%an, %ar)%C(reset)%C(bold blue)%d%C(reset)
