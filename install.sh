@@ -77,7 +77,7 @@ $is_dry_run || target_dir="$(cd "$target_dir"; pwd)";
 # mean "directory" here. Directories are compared recursively.
 common_files=();
 shopt -s dotglob;
-GLOBIGNORE="$source_dir/.git:$source_dir/$(basename "$0")";
+GLOBIGNORE="$source_dir/.git:$source_dir/README.md:$source_dir/$(basename "$0")";
 for source in "$source_dir"/*; do
 	target="$target_dir/${source#$source_dir/}";
 	if [ -e "$target" ]; then
