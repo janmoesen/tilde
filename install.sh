@@ -151,7 +151,7 @@ if [ $num_conflicts -gt 0 ]; then
 fi;
 
 # Install Tilde by symlinking the files from the Tilde repository.
-GLOBIGNORE="$source_dir/.git";
+GLOBIGNORE="$source_dir/.git:$source_dir/$(basename "$0")";
 for source in "$source_dir"/*; do
 	# Determine the directory for our symlinks, relative to the home directory if
 	# possible. (So "/home/janmoesen/.bashrc" links to "src/tilde/.bashrc" rather
