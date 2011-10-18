@@ -73,7 +73,8 @@ source_dir="$(cd "$(dirname "$0")"; pwd)";
 $is_dry_run || target_dir="$(cd "$target_dir"; pwd)";
 
 # Check if any of the files already exist in the target directory, and if so,
-# are not already the same as in this repository.
+# are not already the same as in this repository. Note that "file" can also
+# mean "directory" here. Directories are compared recursively.
 common_files=();
 shopt -s dotglob;
 GLOBIGNORE="$source_dir/.git";
