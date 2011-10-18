@@ -98,12 +98,21 @@ done;
 # Show the files that will be overwritten.
 num_conflicts=${#common_files[@]};
 if [ $num_conflicts -gt 0 ]; then
+	backup_suffix=".tilde-$(date +'%Y%m%d-%H%M%S')";
+
+	# Warn the user about potential dataloss.
 	if [ $num_conflicts -eq 1 ]; then
-		echo 'WARNING: there is a file of yours that conflicts with Tilde.';
-		echo "Your file will be replaced by a symlink to Tilde's:";
+		tput setaf 3;
+		printf 'WARNING: there is a file of yours that conflicts with Tilde.';
+		tput sgr0;
+		echo " Your file will be given the suffix $backup_suffix and" \
+			"replaced by a symlink to Tilde's:";
 	else
-		echo 'WARNING: there are files of yours that conflict with Tilde.';
-		echo "Your files will be replaced by symlinks to Tilde's:";
+		tput setaf 3;
+		printf 'WARNING: there are files of yours that conflict with Tilde.';
+		tput sgr0;
+		echo " Your files will be given the suffix $backup_suffix and" \
+			"replaced by symlinks to Tilde's:" ;
 	fi;
 
 	lbl_yours=" Yours:";
@@ -146,10 +155,17 @@ if [ $num_conflicts -gt 0 ]; then
 			exit 1;
 			;;
 		*)
+			[ -z "$REPLY" ] && echo;
 			echo 'Invalid answer; presumed "no". Installation aborted.';
 			exit 1;
 	esac;
 fi;
+
+# Rename the conflicting files.
+for source in "${common_files[@]}"; do
+	target="$target_dir/${source#$source_dir/}";
+	$dry_run mv -v "$target" "$target$backup_suffix";
+done;
 
 # Install Tilde by symlinking the files from the Tilde repository.
 for source in "$source_dir"/*; do
