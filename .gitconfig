@@ -22,3 +22,4 @@
 	l = log --pretty=concise -n 20
 	ll = log --pretty=concise --graph
 	s = status --short --branch
+	pom = push origin master
