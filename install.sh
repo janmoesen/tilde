@@ -136,7 +136,7 @@ if [ $num_conflicts -gt 0 ]; then
 	# to ensure that "ls" does not sort the files.
 	paste -d ' ' \
 		<(printf '%s\n' "${ls_labels[@]}") \
-		<(ls -dalFf "${ls_files[@]}");
+		<(ls -fdalF "${ls_files[@]}");
 	tput sgr0;
 	echo;
 
