@@ -161,7 +161,7 @@ function udiff {
 # Move the given file(s) to the Trash.
 function trash {
 	local path;
-	for path in "$@"; do
+	for path; do
 		# Make relative paths "absolutey".
 		[ "${path:0:1}" = '/' ] || path="$PWD/$1";
 
@@ -181,7 +181,7 @@ function show {
 
 	# Build the array of paths for AppleScript.
 	local path paths=();
-	for path in "$@"; do
+	for path; do
 		# Make sure each path exists.
 		if ! [ -e "$path" ]; then
 			echo "show: $path: No such file or directory";
@@ -243,7 +243,7 @@ function backup () {(
 
 	# Loop the command-line arguments.
 	local path i=0;
-	for path in "$@"; do
+	for path; do
 		# Update the backup directory timestamp for each file being backed up.
 		local curr_date="$(date +"$date_format")";
 
@@ -447,7 +447,7 @@ function diff-url () {(
 	declare -a after;
 
 	# Remember all URLs.
-	for url in "$@"; do
+	for url; do
 		urls+=("$url");
 	done;
 
@@ -515,7 +515,7 @@ function vack {
 		cmd="${cmd:2}";
 	else
 		cmd='ack';
-		for x in "$@"; do
+		for x; do
 			cmd="$cmd $(printf '%q' "$x")";
 		done;
 		echo "$cmd";
@@ -636,7 +636,7 @@ function wtfis {
 		# Replace the positional parameter array with the last command name.
 		set -- "$1";
 	fi;
-	for cmd in "$@"; do
+	for cmd; do
 		type="$(type "$cmd")";
 		ret=$?;
 		if [ $ret -eq 0 ]; then
