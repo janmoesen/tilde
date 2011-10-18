@@ -67,10 +67,10 @@ elif ! $dry_run mkdir -vp "$target_dir"; then
 	echo "I cannot create a writable directory $target_dir";
 	exit 1;
 fi;
-$is_dry_run || target_dir="$(cd "$target_dir"; pwd)";
 
-# Determine the absolute path to the source directory.
+# Determine the absolute path to the source and target directories.
 source_dir="$(cd "$(dirname "$0")"; pwd)";
+$is_dry_run || target_dir="$(cd "$target_dir"; pwd)";
 
 # Check if any of the files already exist in the target directory, and if so,
 # are not already the same as in this repository.
