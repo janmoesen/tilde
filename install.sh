@@ -20,7 +20,7 @@ then
 	usage "${options[@]}";
 	exit 1;
 fi;
-eval set -- $args;
+eval "set -- $args";
 while (($#)); do
 	case "$1" in
 		--dry-run)
