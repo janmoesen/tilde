@@ -48,6 +48,17 @@ alias pico='nano';
 alias vi='vim';
 export EDITOR='vim';
 
+# Make sure "view" as-is works when stdin is not a terminal and prevent the
+# normal ensuing keyboard input chaos.
+function view {
+	local args=("$@");
+	if ! [ -t /dev/stdin ] && ! (($#)); then
+		echo 'Warning: Input is not from a terminal. Forcing "view -".';
+		args=('-');
+	fi;
+	command view "${args[@]}";
+}
+
 export PAGER='less --quit-if-one-screen --no-init --ignore-case --RAW-CONTROL-CHARS --quiet --dumb';
 # Make "less" transparently unpack archives etc.
 if [ -x /usr/bin/lesspipe ]; then
