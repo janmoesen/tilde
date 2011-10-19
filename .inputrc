@@ -70,5 +70,5 @@ set convert-meta off
 
 # Miscellaneous
 # -----------------------------------------------------------------------------
-# Use visual bell instead of the annoying beep sound.
-set bell-style visible
+# Neither sound a beep nor flash the screen when trying to ring the bell.
+set bell-style none
