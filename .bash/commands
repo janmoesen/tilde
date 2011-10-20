@@ -726,3 +726,64 @@ function wtfis {
 	return $ret;
 }
 complete -A command wtfis;
+
+# Try to make sense of the date. It supports everything GNU date knows how to
+# parse, as well as UNIX timestamps. It formats the given date using the
+# default GNU date format, which you can override using "--format='%x %y %z'.
+#
+# Examples of input and output:
+#
+#   $ whenis 1234567890            # UNIX timestamps
+#   Sat Feb 14 00:31:30 CET 2009
+#
+#   $ whenis +1 year -3 months     # relative dates
+#   Fri Jul 20 21:51:27 CEST 2012
+#
+#   $ whenis 2011-10-09 08:07:06   # MySQL DATETIME strings
+#   Sun Oct  9 08:07:06 CEST 2011
+#
+#   $ whenis 1979-10-14T12:00:00.001-04:00 # HTML5 global date and time
+#   Sun Oct 14 17:00:00 CET 1979
+#
+#   $ (TZ=America/Vancouver whenis) # Current time in Vancouver
+#   Thu Oct 20 13:04:20 PDT 2011
+#
+# When requesting a different timezone like in the last example, make sure to
+# execute the command in a subshell to avoid changing your timezone for the
+# rest of the session.
+#
+# For more info, check out http://kak.be/gnudateformats.
+function whenis {
+	local error='Unable to parse that using http://kak.be/gnudateformats';
+
+	# Default GNU date format as seen in date.c from GNU coreutils.
+	local format='%a %b %e %H:%M:%S %Z %Y';
+	if [[ "$1" =~ ^--format= ]]; then
+		format="${1#--format=}";
+		shift;
+	fi;
+
+	# Concatenate all arguments as one string specifying the date.
+	local date="$*";
+	[[ "$date"  =~ ^[[:space:]]*$ ]] && date='now';
+
+	if [[ "$date" =~ ^[0-9]+$ ]] || [[ "$OSTYPE" =~ ^darwin ]]; then
+		# Use PHP for UNIX timestamps and on OS X, where "date" is not GNU's.
+		php -r '
+			error_reporting(-1);
+			$format = $_SERVER["argv"][1];
+			$date = $_SERVER["argv"][2];
+			if (!is_numeric($date)) {
+				$date = strtotime($date);
+				if ($date === false) {
+					fputs(STDERR, $_SERVER["argv"][3] . PHP_EOL);
+					exit(1);
+				}
+			}
+			echo strftime($format, $date), PHP_EOL;
+		' -- "$format" "$date" "$error";
+	else
+		# Use GNU date in all other situations.
+		date -d "$date" +"$format";
+	fi;
+}
