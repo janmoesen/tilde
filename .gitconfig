@@ -23,4 +23,5 @@
 	ll = log --pretty=concise --graph
 	s = status --short --branch
 	pom = push origin master
+	pum = pull origin master
 	git = !git
