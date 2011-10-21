@@ -787,3 +787,25 @@ function whenis {
 		date -d "$date" +"$format";
 	fi;
 }
+
+# Start your editor ($EDITOR, defaulting to "vim") on the last file specified.
+# This is useful to quickly view the last in a series of timestamped files,
+# e.g.:
+#   $ ls -1 *.sql
+#   20111021-112318.sql
+#   20111021-112328.sql
+#   20111021-112403.sql
+#   20111021-112500.sql
+#   20111021-112704.sql
+#   20111021-112724.sql
+#   20111021-112729.sql
+#   20111021-113949.sql
+#   $ vilast *.sql # will edit 20111021-113949.sql
+function vilast {
+	(($#)) && ${EDITOR:-vim} "${!#}";
+}
+
+# A quick way to invoke a read-only Vim on the last file. See "vilast".
+function viewlast {
+	(EDITOR=view vilast "$@");
+}
