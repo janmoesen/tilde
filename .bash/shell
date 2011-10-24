@@ -18,6 +18,13 @@ export LANG='en_GB';
 
 # History
 # -----------------------------------------------------------------------------
+# When the command contains an invalid history operation (for instance when
+# using an unescaped "!" (I get that a lot in quick e-mails and commit
+# messages) or a failed substitution (e.g. "^foo^bar" when there was no "foo"
+# in the previous command line), do not throw away the command line, but let me
+# correct it.
+shopt -s histreedit;
+
 # Keep a reasonably long history.
 export HISTSIZE=4096;
 
