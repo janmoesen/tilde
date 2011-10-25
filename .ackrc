@@ -1,6 +1,9 @@
 # Flush output immediately, even when piped.
 --flush
 
+# Like in Vim, ignore the case unless the pattern contains mixed case.
+--smart-case
+
 # HTML templates.
 --type-set=tpl=.tpl
 --type-add=html=.tpl
