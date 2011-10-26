@@ -767,8 +767,8 @@ function whenis {
 	local date="$*";
 	[[ "$date"  =~ ^[[:space:]]*$ ]] && date='now';
 
-	if [[ "$date" =~ ^[0-9]+$ ]] || [[ "$OSTYPE" =~ ^darwin ]]; then
-		# Use PHP for UNIX timestamps and on OS X, where "date" is not GNU's.
+	if [[ "$OSTYPE" =~ ^darwin ]]; then
+		# Use PHP on OS X, where "date" is not GNU's.
 		php -r '
 			error_reporting(-1);
 			$format = $_SERVER["argv"][1];
@@ -784,6 +784,7 @@ function whenis {
 		' -- "$format" "$date" "$error";
 	else
 		# Use GNU date in all other situations.
+		[[ "$date" =~ ^[0-9]+$ ]] && date="@$date";
 		date -d "$date" +"$format";
 	fi;
 }
