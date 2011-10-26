@@ -5,7 +5,8 @@
 
 # Paths and binaries
 # -----------------------------------------------------------------------------
-paths=(
+# List the directories we want to add to the PATH variable, if they exist.
+paths_to_add=(
 	# Private "bin"
 	"$HOME/bin"
 	# MacPorts
@@ -13,12 +14,37 @@ paths=(
 	# System
 	/{,s}bin
 	/usr/{,s}bin
+	/usr/local/{,s}bin
 	# X binaries
 	/usr/X11/bin
 );
-printf -v PATH "%s:" "${paths[@]}";
+
+# Create an array of directories currently in the PATH variable.
+oldIFS="$IFS";
+IFS=:;
+set -- $PATH;
+IFS="$oldIFS";
+unset oldIFS;
+old_paths=("$@");
+
+# Construct an array of the directories in the new PATH, preferring our paths
+# to the predefined ones.
+new_paths=();
+for path_to_add in "${paths_to_add[@]}"; do
+	[ -d "$path_to_add" ] && new_paths+=("$path_to_add");
+done;
+for old_path in "${old_paths[@]}"; do
+	[ -d "$old_path" ] || continue;
+	for new_path in "${new_paths[@]}"; do
+		[ "${old_path%%/}" = "${new_path%%/}" ] && continue 2;
+	done;
+	new_paths+=("$old_path");
+done;
+
+# Now implode everything into the new PATH variable.
+printf -v PATH "%s:" "${new_paths[@]}";
 export PATH="${PATH%:}";
-unset paths;
+unset {old,new}_path{,s} path{s,}_to_add;
 
 # Override MacPorts' SSH binaries.
 for x in /usr/bin/ssh*; do
