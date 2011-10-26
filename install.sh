@@ -12,33 +12,23 @@ function usage {
 is_dry_run=false;
 dry_run=;
 target_dir="$HOME";
-if ! args="$(getopt -n "$(basename "$0")" \
-	--options '' \
-	--longoptions 'dry-run,help,prefix:' \
-	-- "$@")";
-then
-	usage "${options[@]}";
-	exit 1;
-fi;
-eval "set -- $args";
 while (($#)); do
 	case "$1" in
 		--dry-run)
 			is_dry_run=true;
 			dry_run=echo;
 			;;
-		--prefix)
-			target_dir="$2";
-			shift;
+		--prefix=*)
+			target_dir="${1#--prefix=}";
 			;;
 		--help)
 			usage;
 			exit 0;
 			;;
-		--)
-			shift;
+		*)
+			[ "$1" = '--' ] && shift;
 			if (($#)); then
-				# There are unexpected non-option arguments.
+				# There are unexpected arguments.
 				usage;
 				exit 1;
 			fi;
