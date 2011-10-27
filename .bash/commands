@@ -836,3 +836,65 @@ function vilast {
 function viewlast {
 	(EDITOR=view vilast "$@");
 }
+
+# Keep executing the given command until it returns 0. If it did not,
+# sleep for 1 second and try again. If still not successful, sleep for 2
+# seconds, and try again. Next, sleep for 4, 8, 16, … seconds (capped at
+# MAX_BB_DELAY, which defaults to 900, or 15 minutes), until the maximum
+# number of tries (MAX_BB_TRIES, defaults to unlimited) has been reached.
+#
+# Note that it is not the "true" binary exponential back-off as the delay is
+# not randomly chosen, but simply doubled each time.
+#
+# An example usage is trying to establish an SSH connection while the network
+# is acting up. Binary back-off ensures that we do not keep retrying
+# unnecessarily much and will patiently wait for longer amounts of time between
+# retries:
+#
+# binary-backoff ssh -f -N -L 10022:intranet.example.com:22 extranet.example.com
+#
+# This will immediately try to set up an SSH tunnel, retrying until successful.
+# If the first try does not succeed, it pauses for 1 second. Then, if still not
+# successful, for 2 seconds. Next, 4 seconds, 8 seconds, and so on. The maximum
+# delay can be specified using MAX_BB_DELAY and defaults to 1 hour. You can set
+# a maximum number of tries using the MAX_BB_TRIES variable.
+function binary-backoff {
+	# Configuration check.
+	if ! (($#)); then
+		echo 'You have to specify a command to execute.' 1>&2;
+		return 127;
+	elif ! [[ "${MAX_BB_DELAY:-3600}" =~ ^[1-9][0-9]*$ ]]; then
+		echo 'MAX_BB_DELAY has to be a positive integer' 1>&2;
+		return 1;
+	elif [ -n "$MAX_BB_TRIES" ] && ! [[ "$MAX_BB_TRIES" =~ ^[1-9][0-9]*$ ]]; then
+		echo 'MAX_BB_TRIES has to be a positive integer' 1>&2;
+		return 1;
+	fi;
+
+	# Start trying.
+	local delay=1;
+	local num_tries=0;
+	while [ -z "$MAX_BB_TRIES" ] || [ $num_tries -lt $MAX_BB_TRIES ]; do
+		# If successful, stop immediately.
+		"$@" && return $?;
+
+		# Otherwise, remember the exit status.
+		exitstatus=$?;
+
+		# Check if have reached the maximum number of tries.
+		let num_tries++;
+		if [ -n "$MAX_BB_TRIES" ] && [ $num_tries -ge $MAX_BB_TRIES ]; then
+			echo "Stopping after $MAX_BB_TRIES tries…" 1>&2;
+			echo "Stopping after $num_tries tries…" 1>&2;
+			return $exit_status;
+		fi;
+
+		# Sleep for a while.
+		echo "Sleeping for $delay seconds after $num_tries tries…" 1>&2;
+		sleep $delay;
+
+		# Double the delay, but cap it at MAX_BB_DELAY.
+		let delay*=2;
+		[ $delay -gt $MAX_BB_DELAY ] && delay=$MAX_BB_DELAY;
+	done;
+}
