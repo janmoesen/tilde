@@ -47,15 +47,17 @@ export PATH="${PATH%:}";
 unset {old,new}_path{,s} path{s,}_to_add;
 
 # Override MacPorts' SSH binaries.
-for x in /usr/bin/ssh*; do
-	[ -x "$x" ] && hash -p "$x" "$(basename "$x")";
+for binary in /usr/bin/ssh*; do
+	[ -x "$binary" ] && hash -p "$binary" "$(basename "$binary")";
 done;
+unset binary;
 
 # OS X's file system is case-insensitive by default, so use aliases to get
 # "GET"/"HEAD"/… working. (Otherwise "HEAD" would execute "/usr/bin/head".)
 [[ "$OSTYPE" =~ ^darwin ]] && for method in GET HEAD POST PUT DELETE TRACE OPTIONS; do
 	alias "$method"="/usr/bin/lwp-request -m $method";
 done;
+unset method;
 
 # Confirm before overwriting
 # -----------------------------------------------------------------------------
@@ -354,10 +356,10 @@ for x in path is_remote source_path source_location curr_backup curr_backup_dir 
 )}
 
 function diff-to-backup () {(
-	local backup_dir="$HOME/backups";
+	local path backup_dir="$HOME/backups";
 
-	for x in "${@:-.}"; do
-		full_path="$(php -r 'echo realpath($_SERVER["argv"][1]);' "$x")";
+	for path in "${@:-.}"; do
+		full_path="$(php -r 'echo realpath($_SERVER["argv"][1]);' "$path")";
 
 		# Check for previous backups.
 		local prev_backup='';
@@ -367,10 +369,10 @@ function diff-to-backup () {(
 		done;
 
 		if [ -z "$prev_backup" ]; then
-			echo "There are no backups of \"$x\"";
+			echo "There are no backups of \"$path\"";
 			exit 1;
 		else
-			udiff -x .svn -r "$prev_backup" "$x";
+			udiff -x .svn -r "$prev_backup" "$path";
 		fi;
 		echo;
 	done;
@@ -479,20 +481,20 @@ function duh {
 # Compare one or more URLs "before" and "after".
 function diff-url () {(
 	cd /tmp || return $?;
-	declare -a urls;
-	declare -a before;
-	declare -a after;
+	local urls=() before=() after=();
 
 	# Remember all URLs.
+	local url;
 	for url; do
 		urls+=("$url");
 	done;
 
 	# Save all URLs to "before and after".
+	local curr;
 	for curr in {before,after}; do
 		read -p "Press Enter to save $curr...";
 
-		for ((i = 0; i < ${#urls[@]}; i++)); do
+		for ((local i = 0; i < ${#urls[@]}; i++)); do
 			url="${urls[$i]}";
 			num="$(printf '%02d' "$i")";
 			file="$curr-$num.html";
