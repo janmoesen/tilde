@@ -494,7 +494,8 @@ function diff-url () {(
 	for curr in {before,after}; do
 		read -p "Press Enter to save $curr...";
 
-		for ((local i = 0; i < ${#urls[@]}; i++)); do
+		local i;
+		for ((i = 0; i < ${#urls[@]}; i++)); do
 			url="${urls[$i]}";
 			num="$(printf '%02d' "$i")";
 			file="$curr-$num.html";
