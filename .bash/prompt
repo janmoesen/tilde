@@ -54,7 +54,7 @@ function __prompt_display_error () {
 
 # More advanced prompt.
 if [ "$USER" = 'root' ]; then
-	__prompt_color="${FONT_BOLD}${FG_RED}";
+	__prompt_color="${FG_RED}";
 	__prompt_title_user_char='#';
 else
 	# You can override this in ~/.bash/extra
