@@ -742,7 +742,15 @@ function wtfis {
 				echo "${type}${fileinfo/$path}";
 
 				# Finally, show it using "ls" and highlight the path.
-				local ls="$(command ls -dalF "$path")";
+				# If the path is a symlink, keep going until we find the
+				# final destination. (This assumes there are no circular
+				# references.)
+				local paths=("$path") target_path="$path";
+				while [ -L "$target_path" ]; do
+					target_path="$(readlink "$target_path")";
+					paths+=("$target_path");
+				done;
+				local ls="$(command ls -fdalF "${paths[@]}")";
 				echo "${ls/$path/$'\e[7m'${path}$'\e[27m'}";
 			fi;
 		fi;
