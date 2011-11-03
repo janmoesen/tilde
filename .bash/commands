@@ -454,6 +454,7 @@ function top10 {
 				summclr=1, msgsclr=1, headclr=3, taskclr=1
 		EOD
 		local output="$(HOME="$tmp_dir"; top -bn 1)";
+		rm -rf "$tmp_dir";
 	fi;
 
 	# Output the result, and use "column" to align the process columns a bit
