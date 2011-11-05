@@ -80,7 +80,7 @@ export EDITOR='vim';
 # normal ensuing keyboard input chaos.
 function view {
 	local args=("$@");
-	if ! [ -t /dev/stdin ] && ! (($#)); then
+	if ! [ -t 0 ] && ! (($#)); then
 		echo 'Warning: Input is not from a terminal. Forcing "view -".';
 		args=('-');
 	fi;
