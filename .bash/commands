@@ -872,10 +872,11 @@ function viewlast {
 # a maximum number of tries using the MAX_BB_TRIES variable.
 function binary-backoff {
 	# Configuration check.
+	local max_delay="${MAX_BB_DELAY:-900}";
 	if ! (($#)); then
 		echo 'You have to specify a command to execute.' 1>&2;
 		return 127;
-	elif ! [[ "${MAX_BB_DELAY:-3600}" =~ ^[1-9][0-9]*$ ]]; then
+	elif ! [[ "$max_delay" =~ ^[1-9][0-9]*$ ]]; then
 		echo 'MAX_BB_DELAY has to be a positive integer' 1>&2;
 		return 1;
 	elif [ -n "$MAX_BB_TRIES" ] && ! [[ "$MAX_BB_TRIES" =~ ^[1-9][0-9]*$ ]]; then
@@ -907,6 +908,6 @@ function binary-backoff {
 
 		# Double the delay, but cap it at MAX_BB_DELAY.
 		let delay*=2;
-		[ $delay -gt $MAX_BB_DELAY ] && delay=$MAX_BB_DELAY;
+		[ $delay -gt $max_delay ] && delay=$max_delay;
 	done;
 }
