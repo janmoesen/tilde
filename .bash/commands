@@ -891,9 +891,6 @@ function binary-backoff {
 		# If successful, stop immediately.
 		"$@" && return $?;
 
-		# Otherwise, remember the exit status.
-		exitstatus=$?;
-
 		# Check if have reached the maximum number of tries.
 		let num_tries++;
 		if [ -n "$MAX_BB_TRIES" ] && [ $num_tries -ge $MAX_BB_TRIES ]; then
