@@ -62,13 +62,17 @@ fi;
 source_dir="$(cd "$(dirname "$0")"; pwd)";
 $is_dry_run || target_dir="$(cd "$target_dir"; pwd)";
 
+# Create the array of files to symlink. For now that means: everything starting
+# with a dot, excluding ".", ".." and this repository's data.
+printf -v GLOBIGNORE '%s:' "$source_dir"/{.,..,.git,.gitmodules};
+source_files=("$source_dir"/.*);
+
 # Check if any of the files already exist in the target directory, and if so,
 # are not already the same as in this repository. Note that "file" can also
 # mean "directory" here. Directories are compared recursively.
 common_files=();
 shopt -s dotglob;
-GLOBIGNORE="$source_dir/.git:$source_dir/README.md:$source_dir/$(basename "$0")";
-for source in "$source_dir"/*; do
+for source in "${source_files[@]}"; do
 	target="$target_dir/${source#$source_dir/}";
 	if [ -e "$target" ]; then
 		# If source and target point to the same file, it is OK to replace
@@ -158,7 +162,7 @@ for source in "${common_files[@]}"; do
 done;
 
 # Install Tilde by symlinking the files from the Tilde repository.
-for source in "$source_dir"/*; do
+for source in "${source_files[@]}"; do
 	# Determine the directory for our symlinks, relative to the home directory if
 	# possible. (So "/home/janmoesen/.bashrc" links to "src/tilde/.bashrc" rather
 	# than "/home/janmoesen/src/tilde/.bashrc".)
