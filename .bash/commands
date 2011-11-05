@@ -911,3 +911,57 @@ function binary-backoff {
 		[ $delay -gt $max_delay ] && delay=$max_delay;
 	done;
 }
+
+# Do a mysqldump via ssh and store it in a local timestamped file. This
+# function assumes proper setup in your local ~/.ssh/config and the remote
+# ~/.my.cnf.
+function ssh-mysqldump {
+	local timestamp="$(date +'%Y%m%d-%H%M%S')";
+	if [ -z "$1" -o "$1" = '--help' ]; then
+		local filename="$timestamp-ssh_host-database_name.sql";
+		echo "Usage: ${FUNCNAME[0]} ssh_host [database_name]";
+		echo "This will create a file called $filename in this directory.";
+
+		# Do not return an error when the user explicitly requested help.
+		[ "$1" = '--help' ];
+		return $?;
+	fi;
+
+	# Determine the host and the database, with the database name defaulting
+	# to the host name (or SSH config alias).
+	local host="$1";
+	local database="$host";
+	shift;
+	if (($#)) && [ "${1:0:1}" != '-' ]; then
+		database="$1";
+		shift;
+	fi;
+
+	# I prefer one INSERT statement per record, so by default, disable the
+	# extended INSERT syntax. Unless there is an explicit option in the
+	# arguments.
+	local has_extended_insert_option=false;
+
+	# Escape the meta-characters in the arguments so they are safe for the
+	# remote shell.
+	local args=() arg;
+	for arg; do
+		args+=("$(printf '%q' "$arg")");
+		[ "$arg" = '--extended-insert' ] && has_extended_insert_option=false;
+	done;
+	$has_extended_insert_option && args+=('--skip-extended-insert');
+	local filename="$timestamp-${host//\//-}-${database//\//-}.sql";
+
+	# Finally, run the remote mysqldump and store the result locally.
+	# If you want compression, set it in your ~/.ssh/config. I quote the man
+	# page: "[ Compression ] will only slow down things on fast networks."
+	ssh -- "$host" mysqldump "${args[@]}" "$database" > "$filename";
+	local result=$?;
+
+	if [ -s "$filename" ]; then
+		ls -dalF "$filename";
+	else
+		rm -f "$filename";
+	fi;
+	return $result;
+}
