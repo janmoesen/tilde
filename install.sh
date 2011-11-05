@@ -162,13 +162,20 @@ for source in "${common_files[@]}"; do
 done;
 
 # Install Tilde by symlinking the files from the Tilde repository.
+has_created_links=false;
 for source in "${source_files[@]}"; do
 	# Determine the directory for our symlinks, relative to the home directory if
 	# possible. (So "/home/janmoesen/.bashrc" links to "src/tilde/.bashrc" rather
 	# than "/home/janmoesen/src/tilde/.bashrc".)
 	relative_source="${source#$target_dir/}";
 	target="$target_dir/${source#$source_dir/}";
-	$dry_run rm -rf "$target" && \
+	if [ -L "$target" -a "$(readlink "$target")" = "$relative_source" ]; then
+		continue;
+	fi;
+	$dry_run rm -rf "$target" &&
 	$dry_run ln -vs "$relative_source" "$target";
+	has_created_links=true;
 done;
+$has_created_links || echo "All of Tilde's files were symlinked already.";
+echo 'Done.';
 
