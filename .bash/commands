@@ -946,7 +946,7 @@ function ssh-mysqldump {
 		args+=("$(printf '%q' "$arg")");
 		[ "$arg" = '--extended-insert' ] && has_extended_insert_option=false;
 	done;
-	$has_extended_insert_option && args+=('--skip-extended-insert');
+	$has_extended_insert_option || args+=('--skip-extended-insert');
 	local filename="$timestamp-${host//\//-}-${database//\//-}.sql";
 
 	# Finally, run the remote mysqldump and store the result locally.
