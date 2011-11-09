@@ -922,7 +922,7 @@ function ssh-mysqldump {
 		# Do not return an error when the user explicitly requested help.
 		[ "$1" = '--help' ];
 		return $?;
-	fi;
+	fi >&2;
 
 	# Determine the host and the database, with the database name defaulting
 	# to the host name (or SSH config alias).
@@ -952,7 +952,12 @@ function ssh-mysqldump {
 	# Finally, run the remote mysqldump and store the result locally.
 	# If you want compression, set it in your ~/.ssh/config. I quote the man
 	# page: "[ Compression ] will only slow down things on fast networks."
-	ssh -- "$host" mysqldump "${args[@]}" "$database" > "$filename";
+	if [ -t 1 ]; then
+		ssh -- "$host" mysqldump "${args[@]}" "$database" > "$filename";
+	else
+		echo "Stdout is not a terminal, so I won't save to $filename." >&2;
+		ssh -- "$host" mysqldump "${args[@]}" "$database";
+	fi;
 	local result=$?;
 
 	if [ -s "$filename" ]; then
