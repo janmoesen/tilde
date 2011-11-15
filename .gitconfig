@@ -15,6 +15,13 @@
 [merge]
 	tool = vimdiff
 
+[push]
+	# Make "git push" or "git push <remote>" only push the current branch to
+	# the tracked branch (regardless of its remote name) as opposed to pushing
+	# all branches with a matching name on the remote. See "An asymmetry
+	# between git pull and push": http://longair.net/blog/?p=572
+	default = tracking
+
 [alias]
 	# When doing "git git log" or some such, do not complain about "git" not
 	# being a valid Git command. This happens when copy-pasting examples, for
