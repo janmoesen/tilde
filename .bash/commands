@@ -151,6 +151,9 @@ alias ctags='ctags --exclude={docs,cache,tiny_mce,layout} --recurse';
 # OS X has no "md5sum", so use "md5" as a fall-back.
 type -t md5sum > /dev/null || alias md5sum='md5';
 
+# Make the "sudo" prompt more useful, without requiring access to "visudo".
+export SUDO_PROMPT='[sudo] password for %u on %h: ';
+
 # Version control
 # -----------------------------------------------------------------------------
 # Use "colordiff" or "highlight" to colour diffs.
