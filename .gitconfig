@@ -47,3 +47,6 @@
 	# counterpart. I always try to rebase to prevent unnecessary merge
 	# commits.
 	pum = pull --rebase origin master
+
+	# Show the staged changes.
+	dc = diff --cached
