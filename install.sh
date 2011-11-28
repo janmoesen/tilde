@@ -59,8 +59,8 @@ elif ! $dry_run mkdir -vp "$target_dir"; then
 fi;
 
 # Determine the absolute path to the source and target directories.
-source_dir="$(cd "$(dirname "$0")"; pwd)";
-$is_dry_run || target_dir="$(cd "$target_dir"; pwd)";
+source_dir="$(cd "$(dirname "$0")" > /dev/null; pwd)";
+$is_dry_run || target_dir="$(cd "$target_dir" > /dev/null; pwd)";
 
 # Create the array of files to symlink. For now that means: everything starting
 # with a dot, excluding ".", ".." and this repository's data.
