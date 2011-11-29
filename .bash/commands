@@ -942,14 +942,30 @@ function ssh-mysqldump {
 	# arguments.
 	local has_extended_insert_option=false;
 
-	# Escape the meta-characters in the arguments so they are safe for the
-	# remote shell.
-	local args=() arg;
+	# By default, do not lock the tables while dumping. This is slightly less
+	# accurate, but locking tables used in production can wreak havoc. Prefer
+	# uptime to correctness.
+	local has_lock_all_tables_option=false;
+	local has_lock_tables_option=false;
+
+	local arg args=();
 	for arg; do
+		# Escape the meta-characters in the arguments so they are safe for
+		# the remote shell.
 		args+=("$(printf '%q' "$arg")");
-		[ "$arg" = '--extended-insert' ] && has_extended_insert_option=false;
+
+		# See if our default options are overridden.
+		if [[ "$arg" =~ ^--(skip-)?extended-insert$ ]]; then
+			has_extended_insert_option=true;
+		elif [[ "$arg" =~ ^--(skip-)?lock-all-tables$ ]]; then
+			has_lock_all_tables_option=true;
+		elif [[ "$arg" =~ ^--(skip-)?lock-tables$ ]]; then
+			has_lock_tables_option=true;
+		fi;
 	done;
 	$has_extended_insert_option || args+=('--skip-extended-insert');
+	$has_lock_all_tables_option || args+=('--skip-lock-all-tables');
+	$has_lock_tables_option || args+=('--skip-lock-tables');
 	local filename="$timestamp-${host//\//-}-${database//\//-}.sql";
 
 	# Finally, run the remote mysqldump and store the result locally.
