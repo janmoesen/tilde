@@ -50,3 +50,6 @@
 
 	# Show the staged changes.
 	dc = diff --cached
+
+	# Like "git show myfile", but uses the last commit that changed "myfile".
+	showlast = log -n 1 -p
