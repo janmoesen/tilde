@@ -13,3 +13,6 @@
 
 # Generated documentation.
 --ignore-dir=docs
+
+# Fork CMS cache.
+--ignore-dir=compiled_templates
