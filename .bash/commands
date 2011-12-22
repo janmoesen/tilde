@@ -806,7 +806,12 @@ function whenis {
 
 	# Concatenate all arguments as one string specifying the date.
 	local date="$*";
-	[[ "$date"  =~ ^[[:space:]]*$ ]] && date='now';
+	if [[ "$date"  =~ ^[[:space:]]*$ ]]; then
+		date='now';
+	elif [[ "$date"  =~ ^[0-9]{13}$ ]]; then
+		# Cut the microseconds part.
+		date="${date:0:10}";
+	fi;
 
 	if [[ "$OSTYPE" =~ ^darwin ]]; then
 		# Use PHP on OS X, where "date" is not GNU's.
