@@ -954,11 +954,15 @@ function ssh-mysqldump {
 	local has_lock_all_tables_option=false;
 	local has_lock_tables_option=false;
 
-	local arg args=();
+	local arg opts=() args=();
 	for arg; do
 		# Escape the meta-characters in the arguments so they are safe for
 		# the remote shell.
-		args+=("$(printf '%q' "$arg")");
+		if [ "${arg:0:1}" = '-' ]; then
+			opts+=("$(printf '%q' "$arg")");
+		else
+			args+=("$(printf '%q' "$arg")");
+		fi;
 
 		# See if our default options are overridden.
 		if [[ "$arg" =~ ^--(skip-)?extended-insert$ ]]; then
@@ -969,19 +973,19 @@ function ssh-mysqldump {
 			has_lock_tables_option=true;
 		fi;
 	done;
-	$has_extended_insert_option || args+=('--skip-extended-insert');
-	$has_lock_all_tables_option || args+=('--skip-lock-all-tables');
-	$has_lock_tables_option || args+=('--skip-lock-tables');
+	$has_extended_insert_option || opts+=('--skip-extended-insert');
+	$has_lock_all_tables_option || opts+=('--skip-lock-all-tables');
+	$has_lock_tables_option || opts+=('--skip-lock-tables');
 	local filename="$timestamp-${host//\//-}-${database//\//-}.sql";
 
 	# Finally, run the remote mysqldump and store the result locally.
 	# If you want compression, set it in your ~/.ssh/config. I quote the man
 	# page: "[ Compression ] will only slow down things on fast networks."
 	if [ -t 1 ]; then
-		ssh -- "$host" mysqldump "${args[@]}" "$database" > "$filename";
+		ssh -- "$host" mysqldump "${opts[@]}" "$database" "${args[@]}" > "$filename";
 	else
 		echo "Stdout is not a terminal, so I won't save to $filename." >&2;
-		ssh -- "$host" mysqldump "${args[@]}" "$database";
+		ssh -- "$host" mysqldump "${opts[@]}" "${args[@]}" "$database";
 	fi;
 	local result=$?;
 
