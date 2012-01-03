@@ -736,6 +736,7 @@ function wtfis {
 						buf="$buf${line/.  */.} ";
 						if [[ "$buf" =~ \.\ $ ]]; then
 							echo "$buf";
+							buf='';
 							break;
 						fi;
 					done;
