@@ -128,6 +128,7 @@ fi;
 complete -d cd pushd rmdir;
 complete -u finger mail;
 complete -v set unset;
+complete -A command wtfis;
 [ -d ~/.bash/completion ] && for file in ~/.bash/completion/*; do
 	[ -f "$file" ] && source "$file";
 done;
