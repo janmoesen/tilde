@@ -59,6 +59,9 @@ for binary in /usr/bin/ssh*; do
 done;
 unset binary;
 
+# Prefer Homebrew's netcat
+[ -x /usr/local/bin/netcat ] && hash -p /usr/local/bin/netcat nc;
+
 # OS X's file system is case-insensitive by default, so use aliases to get
 # "GET"/"HEAD"/… working. (Otherwise "HEAD" would execute "/usr/bin/head".)
 [[ "$OSTYPE" =~ ^darwin ]] && for method in GET HEAD POST PUT DELETE TRACE OPTIONS; do
