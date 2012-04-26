@@ -1,6 +1,6 @@
 Tilde: ~ is where the ♥ is
 
-Various configuration files ("dot files") and scripts from my home directory. I
+Various configuration files ("dotfiles") and scripts from my home directory. I
 use this on new computers so I feel more at home.
 
 To install, execute:
