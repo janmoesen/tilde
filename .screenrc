@@ -1,17 +1,19 @@
-# Use Ctrl+J instead of Ctrl+A, which goes to the start of a line in Readline.
+# Use Ctrl+J instead of Ctrl+A, which goes to the start of a line in Bash and
+# other applications that use the Readline library.
 escape ^Jj
 
-# Bind F11 and F12 (NOT F1 and F2) to previous and next screen window.
+# Bind F11 and F12 (NOT F1 and F2) to previous and next screen window. (F1 and
+# F2 would be "bindkey -k k1 prev" and "bindkey -k -k2 next", for some reason.)
 bindkey -k F1 prev
 bindkey -k F2 next
 
-# I know the basics of screen now, thanks.
+# Do not show the introduction screen ("Press bla to bla.")
 startup_message off
 
 # Show a window list at the bottom.
 hardstatus alwayslastline
 hardstatus string "%-w%{= BW}%50>%n %t%{-}%+w%<"
 
-# Don't block command output if the terminal stops responding
-# (like if the SSH connection times out for example).
+# Don't block command output if the terminal stops responding (for example, if
+# the SSH connection times out).
 nonblock on
