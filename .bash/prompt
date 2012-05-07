@@ -62,8 +62,10 @@ else
 	__prompt_color="${FG_RED}";
 	__prompt_title_user_char='#';
 fi;
-[[ "$TERM" =~ ^xterm ]] && export PS1=$'\e]0;'"${HOSTNAME%.local}${__prompt_title_user_char} "$'\\W \a'"$PS1";
 type -t git > /dev/null \
 	&& __prompt_vcs_string=' $(git-show-branch)' \
 	|| __prompt_vcs_string='';
 export PS1="\${__prompt_color}-----[ \\t ]$(__prompt_display_process_tree) (!\\!) [ \$(__prompt_display_error) ] \\u@\\h \\w$__prompt_vcs_string\\e[m\\n\\$ ";
+
+# Update the window/tab title for GUI terminals.
+[[ "$TERM" =~ ^xterm ]] && export PS1=$'\e]0;'"${HOSTNAME%.local}${__prompt_title_user_char} "$'\\W \a'"$PS1";
