@@ -68,4 +68,14 @@ type -t git > /dev/null \
 export PS1="\${__prompt_color}-----[ \\t ]$(__prompt_display_process_tree) (!\\!) [ \$(__prompt_display_error) ] \\u@\\h \\w$__prompt_vcs_string\\e[m\\n\\$ ";
 
 # Update the window/tab title for GUI terminals.
-[[ "$TERM" =~ ^xterm ]] && export PS1=$'\e]0;'"${HOSTNAME%.local}${__prompt_title_user_char} "$'\\W \a'"$PS1";
+if [[ "$TERM" =~ ^(xterm|screen) ]]; then
+	# Show the basename of the current working directory in the title.
+	title_string='\\W';
+
+	# When connected via SSH, show the hostname in the title, too.
+	[ -n "$SSH_CLIENT" ] \
+		&& title_string="${HOSTNAME%.local}${__prompt_title_user_char} \W" \
+		|| title_string='\W';
+
+	export PS1=$'\\[\e]0;'"$title_string"$'\a'"\\]$PS1";
+fi;
