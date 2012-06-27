@@ -84,7 +84,7 @@ alias rm='rm -i';
 alias nano='nano -w';
 alias pico='nano';
 alias vi='vim';
-export EDITOR='vim';
+export EDITOR='vim -p';
 
 # Make sure "view" as-is works when stdin is not a terminal and prevent the
 # normal ensuing keyboard input chaos.
@@ -584,7 +584,7 @@ function vack {
 		echo "$file";
 		files+=("$file");
 	done < <(bash -c "${cmd/ack/ack -l}");
-	"${EDITOR:-vim}" "${files[@]}";
+	${EDITOR:-vim -p} "${files[@]}";
 }
 
 # Convert the parameters or STDIN to lowercase.
@@ -714,6 +714,7 @@ function wtfis {
 						# spaces inside command names.
 						read -d ' ' alias_ <<< "$alias_";
 						# Recurse and indent the output.
+						# TODO: prevent infinite recursion
 						wtfis "$alias_" 2>&2 | sed 's/^/  /';
 						;;
 					'keyword' | 'builtin')
