@@ -67,7 +67,7 @@ function main {
 				# First, get the one-line description from the man page.
 				# ("col -b" gets rid of the backspaces used by OS X's man
 				# to get a "bold" font.)
-				man "$(basename "$path")" 2>/dev/null | col -b | \
+				(COLUMNS=10000 man "$(basename "$path")" 2>/dev/null) | col -b | \
 				awk '/^NAME$/,/^$/' | {
 					local buf line;
 					read -r line;
