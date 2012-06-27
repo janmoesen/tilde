@@ -93,7 +93,13 @@ function main {
 				local paths=("$path") target_path="$path";
 				while [ -L "$target_path" ]; do
 					target_path="$(readlink "$target_path")";
-					paths+=("$target_path");
+					paths+=("$(
+						# Do some relative path resolving for systems
+						# without readlink --canonicalize.
+						cd "$(dirname "$path")";
+						cd "$(dirname "$target_path")";
+						echo "$PWD/$(basename "$target_path")"
+					)");
 				done;
 				local ls="$(command ls -fdalF "${paths[@]}")";
 				echo "${ls/$path/$'\e[7m'${path}$'\e[27m'}";
