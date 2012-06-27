@@ -134,7 +134,7 @@ if [ $num_conflicts -gt 0 ]; then
 	tput sgr0;
 	echo;
 
-	# Make sure the user knows that their will be dataloss.
+	# Make sure the user confirms his/her existing files will be renamed.
 	read -p 'Would you like to continue? If so, please type "yes": ';
 	case "$(tr '[:upper:]' '[:lower:]' <<< "$REPLY")" in
 		'yes')
