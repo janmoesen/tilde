@@ -921,8 +921,21 @@ function binary-backoff {
 		fi;
 
 		# Sleep for a while.
-		echo "Sleeping for $delay seconds after $num_tries tries…" 1>&2;
-		sleep $delay;
+		echo;
+		local move_up="$(tput cuu1)" clear_line="$(tput el)";
+		num_seconds_left=$delay;
+		while [ $num_seconds_left -gt 0 ]; do
+			[ $num_seconds_left -eq 1 ] \
+				&& local time_unit=second \
+				|| local time_unit=seconds;
+			echo "${move_up}${clear_line}Waiting for $num_seconds_left $time_unit after $num_tries tries…" 1>&2;
+			sleep 1;
+			let num_seconds_left--;
+		done;
+		[ $delay -eq 1 ] \
+			&& local time_unit=second \
+			|| local time_unit=seconds;
+		echo "${move_up}${clear_line}Waited for $delay $time_unit. Retrying." 1>&2;
 
 		# Double the delay, but cap it at MAX_BB_DELAY.
 		let delay*=2;
