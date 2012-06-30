@@ -35,6 +35,14 @@ while (($#)); do
 	esac;
 	shift;
 done;
+if [ "$target_dir" = '~' ]; then
+	target_dir=~;
+fi;
+if [[ "$target_dir" =~ ^/+$ ]]; then
+	target_dir=/;
+elif [[ "$target_dir" =~ ^(.*[^/]+)/+$ ]]; then
+	target_dir="${BASH_REMATCH[1]}";
+fi;
 
 $is_dry_run && echo 'Dry run mode. Not actually executing anything.';
 
