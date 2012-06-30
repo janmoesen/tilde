@@ -61,7 +61,7 @@ elif [ -d "$target_dir" ]; then
 elif [ -e "$target_dir" ]; then
 	echo "$target_dir exists, but is not a writable directory.";
 	exit 1;
-elif ! $dry_run mkdir -vp "$target_dir"; then
+elif ! $dry_run mkdir -p "$target_dir"; then
 	echo "I cannot create a writable directory $target_dir";
 	exit 1;
 fi;
