@@ -196,7 +196,8 @@ if [ -d "$bash_dir" -a -L "$bash_dir" ]; then
 		'and recreate it as a directory.';
 	echo "Next, I will create symlinks to all files in Tilde's .bash" \
 		'directory. If you experience any problems after the upgrade,' \
-		'please file an issue on GitHub: https://github.com/janmoesen/tilde';
+		'please file an issue on GitHub:';
+	echo 'https://github.com/janmoesen/tilde';
 	echo;
 	$dry_run mv "$bash_dir" "$bash_dir$backup_suffix";
 
