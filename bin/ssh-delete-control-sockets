@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# Clean up all SSH control sockets. Note that this does not look for stale
+# sockets or anything remotely intelligent. It simply deletes *all* control
+# sockets. This can be useful after a crash, for instance.
+#
+# The ideal behaviour has been added in OpenSSH 5.8. See this bug report:
+# https://bugzilla.mindrot.org/show_bug.cgi?id=1329. Unfortunately, OS X
+# Lion still uses OpenSSH 5.6.
+
+# Use Awk to "parse" the SSH configuration for ControlPath statements.
+awk '$1 == "ControlPath" { print $2; }' ~/.ssh/config | while read -r path; do
+	# The path expansion below does not expand "~", so do it here.
+	[[ "$path" =~ ^~/ ]] && path="${HOME%/}/${path#??}";
+
+	# Replace all SSH ControlPath parameters (%h for host, etc.) by wildcards.
+	path="${path//%?/*}";
+
+	# By not quoting "$path", Bash will expand the wildcards.
+	for socket in $path; do
+		if [ -S "$socket" ]; then
+			rm -vf "$socket";
+		fi;
+	done;
+done;
