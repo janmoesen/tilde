@@ -68,7 +68,7 @@ type -t git > /dev/null \
 export PS1="\${__prompt_color}-----[ \\t ]$(__prompt_display_process_tree) (!\\!) [ \$(__prompt_display_error) ] \\u@\\h \\w$__prompt_vcs_string\\e[m\\n\\$ ";
 
 # Update the window/tab title for GUI terminals.
-if [[ "$TERM" =~ ^(xterm|screen) ]]; then
+if [ "${TERM#xterm}" != "$TERM" -o "${TERM#screen}" != "$TERM" ]; then
 	# Show the basename of the current working directory in the title.
 	title_string='\\W';
 
