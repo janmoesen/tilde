@@ -73,7 +73,6 @@ $is_dry_run || target_dir="$(cd "$target_dir" > /dev/null; pwd)";
 # Create the array of files to symlink.
 source_files=();
 ignored_files=(
-	.gitconfig
 	.gitignore
 	COPYING
 	README.md
