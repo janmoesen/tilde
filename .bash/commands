@@ -755,9 +755,16 @@ function wtfis {
 					[ -n "$buf" ] && echo "$buf";
 				}
 
-				# Then, combine the output "type" and "file".
-				local fileinfo="$(file "$path")";
-				echo "${type}${fileinfo/$path}";
+				# Get the absolute path for the binary.
+				local full_path="$(
+					cd "$(dirname "$path")" \
+						&& echo "$PWD/$(basename "$path")" \
+						|| echo "$path"
+				)";
+
+				# Then, combine the output of "type" and "file".
+				local fileinfo="$(file "$full_path")";
+				echo "${type%$path}${fileinfo}";
 
 				# Finally, show it using "ls" and highlight the path.
 				# If the path is a symlink, keep going until we find the
