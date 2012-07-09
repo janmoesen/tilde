@@ -78,4 +78,5 @@ if [ "${TERM#xterm}" != "$TERM" -o "${TERM#screen}" != "$TERM" ]; then
 		|| title_string='\W';
 
 	export PS1=$'\\[\e]0;'"$title_string"$'\a'"\\]$PS1";
+	unset title_string;
 fi;
