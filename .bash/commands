@@ -302,7 +302,7 @@ type -t hd > /dev/null || alias hd='hexdump -C';
 # that looks like a full backup, like Time Machine does.
 function backup () {(
 	# Backup format.
-	local backup_dir="$HOME/backups";
+	local backup_dir="${TILDE_BACKUP_DIR:-$HOME/backups}";
 	local date_format='%Y-%m-%d-%H-%M-%S';
 
 	# Usage.
@@ -310,6 +310,7 @@ function backup () {(
 		echo 'Usage: backup [[USER@]HOST:]FILE...';
 		echo;
 		echo "Back up the given files and directories to $backup_dir/$(date +"$date_format")";
+		echo 'The backup directory is read from $TILDE_BACKUP_DIR, defaulting to $HOME/backups'.
 		[ "$1" = '--' ] && shift;
 		[ $# -gt 0 ];
 		exit $?;
