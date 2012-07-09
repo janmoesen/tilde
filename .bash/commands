@@ -331,24 +331,29 @@ function backup () {(
 		# Determine the full source path, source location and target path.
 		# For local files, the source path and location are the same. For
 		# remote files, the location is [user@]host:path.
+		local is_dir source_location source_path;
 		if [ $is_remote -eq 1 ]; then
 			# For SSH sources, use SSH to find the full path.
 			host="${BASH_REMATCH[1]}";
-			local source_path="$(ssh "$host" "$(printf "$(cat <<-'EOD'
+			{ read is_dir; read -r source_path; } < <(ssh "$host" "$(printf "$(cat <<-'EOD'
 				host=%q;
 				path=%q;
 				if ! [ -z "$path" -o -e "$path" ]; then
 					echo "$host:$path does not exist." 1>&2;
 					exit 1;
 				fi;
+				[ -d "$path" ] && echo 1 || echo 0;
 				{ [ -d "$path" ] && cd -- "$path" && pwd; } || { cd -- "$(dirname -- "$path")" && echo "$PWD/$(basename -- "$path")"; }
-			EOD)" "$host" "${BASH_REMATCH[2]}")")" || exit 1;
-			local source_location="$host:$source_path";
-			local source_path="/ssh=$host$source_path";
+			EOD)" "$host" "${BASH_REMATCH[2]}")") || exit 1;
+			source_location="$host:$source_path";
+			source_path="/ssh=$host$source_path";
 		elif [ -z "$path" -o -e "$path" ]; then
 			# For local sources, go to the directory or the file's parent directory and use the working directory.
-			local source_path="$({ [ -d "$path" ] && cd -- "$path" && pwd; } || { cd -- "$(dirname -- "$path")" && echo "$PWD/$(basename -- "$path")"; })";
-			local source_location="$source_path";
+			source_path="$({ [ -d "$path" ] && cd -- "$path" && pwd; } || { cd -- "$(dirname -- "$path")" && echo "$PWD/$(basename -- "$path")"; })";
+			source_location="$source_path";
+			[ -d "$source_path" ] \
+				&& is_dir=1 \
+				|| is_dir=0;
 		else
 			echo "$path does not exist." 1>&2;
 			exit 1;
@@ -356,9 +361,12 @@ function backup () {(
 
 		# Determine the target directory for the current backup.
 		local curr_backup="$backup_dir/$curr_date$source_path";
-		# if [ $is_remote -eq 1 ]; then
 		local curr_backup_dir="$(dirname "$curr_backup")";
-		local curr_backup_dir="$curr_backup";
+		if [ $is_dir -eq 1 ]; then
+			local curr_backup_dir="${curr_backup%/}/";
+		else
+			local curr_backup_dir="$(dirname "$curr_backup")/";
+		fi;
 
 		# Check for previous backups.
 		local prev_backup='';
@@ -367,8 +375,6 @@ function backup () {(
 			:
 		done;
 
-# XXX debug delme
-for x in path is_remote source_path source_location curr_backup curr_backup_dir prev_backup; do printf $'%12s: "%s"\n' "$x" "${!x}"; done
 		# Back up using rsync, hard-linking unchanged files to the previous backup, if any.
 		mkdir -p "$curr_backup_dir";
 		if [ "$(basename "$source_path")" = "$path" ]; then
@@ -377,14 +383,26 @@ for x in path is_remote source_path source_location curr_backup curr_backup_dir 
 			echo "Now backing up:  \"$path\" (\"$source_path\")";
 		fi;
 		echo "Backing up to:   \"$curr_backup\"";
+
+		if [ $is_dir -eq 1 ]; then
+			source_location="$source_location/";
+		fi;
+
 		if [ -z "$prev_backup" ]; then
 			echo 'Previous backup: (none)';
 			echo;
-			echo rsync --itemize-changes --archive -- "$source_location" "$curr_backup_dir";
+			local command=(rsync --itemize-changes --archive -- "$source_location" "$curr_backup_dir");
+			echo "${command[@]}";
+			"${command[@]}";
 		else
 			echo "Previous backup: \"$prev_backup\"";
 			echo;
-			echo rsync --itemize-changes --archive --link-dest="$(dirname "$prev_backup")" -- "$source_location" "$curr_backup_dir"; # | sed '/\/\.svn\//d; /^cd+++++++ .*\/$/d';
+			if [ $is_dir -eq 0 ]; then
+				prev_backup="$(dirname "$prev_backup/")";
+			fi;
+			command=(rsync --itemize-changes --archive --link-dest="$prev_backup" -- "$source_location" "$curr_backup_dir");
+			echo "${command[@]}";
+			"${command[@]}";
 		fi;
 
 		# Print a blank line between two backups.
