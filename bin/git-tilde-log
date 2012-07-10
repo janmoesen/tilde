@@ -10,7 +10,27 @@
 # of 0).
 set -o pipefail;
 
-git log --pretty=concise -n 20 "$@" | sed '
+# Format the log as multicolour lines highlighting the parts I care about most.
+format_concise_parts=(
+	# Abbreviated commit hash. E.g., "b4db4be".
+	'%C(yellow)%h%C(reset) '
+
+	# Relative date (age). E.g., "3 days ago". Abbreviated by "sed" below.
+	'%C(bold black)(%ar)%C(reset) '
+
+	# Subject. E.g., "Homepage: add Frobnitz widget".
+	'%s '
+
+	# Author name. E.g., "Jan Moesen".
+	'%C(bold black)(%an)%C(reset)'
+
+	# Branches. (Always wrapped in parentheses and preceded by a space.)
+	# E.g., "(HEAD, origin/master, origin/frobnitz)
+	'%C(bold blue)%d%C(reset)'
+);
+printf -v format_concise '%s' "${format_concise_parts[@]}";
+
+git log --pretty="format:$format_concise" -n 20 "$@" | sed '
 	# Change "3 weeks ago" into "3 weeks".
 	s/^\([^)]*\) ago)/\1)/;
 
