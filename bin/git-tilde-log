@@ -1,8 +1,13 @@
 #!/bin/bash
-
+#
 # This is a companion script for Tilde's .gitconfig.
+#
+# Inspired by Gary Bernhardt's "experimental git log":
+# https://github.com/garybernhardt/dotfiles/commit/62a932b9
+# https://github.com/garybernhardt/dotfiles/commit/17e89bf4
 
-
+# Return the exit status of "git log" (assuming "sed" always has an exit status
+# of 0).
 set -o pipefail;
 
 git log --pretty=concise -n 20 "$@" | sed '
