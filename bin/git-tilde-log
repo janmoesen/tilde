@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# This is a companion script for Tilde's .gitconfig.
+
+git log --pretty=concise -n 20 "$@" | sed '
+	# Change "3 weeks ago" into "3 weeks".
+	s/^\([^)]*\) ago)/\1)/;
+
+	# Abbreviate the time units.
+	s/^\([^)]*\) \(s\)econds)/\1\2)/;
+	s/^\([^)]*\) \(min\)utes)/\1 \2)/;
+	s/^\([^)]*\) \(h\)ours)/\1\2)/;
+	s/^\([^)]*\) \(d\)ays)/\1\2)/;
+	s/^\([^)]*\) \(w\)eeks)/\1\2)/;
+	s/^\([^)]*\) \(mon\)ths)/\1 \2)/;
+	s/^\([^)]*\) \(y\)ears)/\1\2)/;
+';

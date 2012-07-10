@@ -10,7 +10,9 @@
 	ui = auto
 
 [pretty]
-	concise = %C(yellow)%h%C(reset) %s %C(bold black)(%an, %ar)%C(reset)%C(bold blue)%d%C(reset)
+	# A multicolour oneliner highlighting the parts I care about most:
+	# abbreviated SHA, relative age, subject and branch.
+	concise = %C(yellow)%h%C(reset) %C(bold black)(%ar)%C(reset) %s %C(bold black)(%an)%C(reset)%C(bold blue)%d%C(reset)
 
 [merge]
 	tool = vimdiff
@@ -32,9 +34,9 @@
 	# instance.
 	git = !git
 
-	# Quickly view the latest commits in a multicolour oneliner format that
-	# highlights the parts I care about most: SHA, description and branch.
-	l = log --pretty=concise -n 20
+	# Quickly view the latest commits using a helper script to massage the
+	# "git log" output.
+	l = tilde-log
 
 	# Like "git l", but show all and draw the history graph, too.
 	ll = log --pretty=concise --graph
