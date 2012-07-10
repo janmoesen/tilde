@@ -21,5 +21,5 @@ git log --pretty=concise -n 20 "$@" | sed '
 	# Use at least two digits before the time unit for nicer alignment
 	# (until there are commits older than nine years). Of course, because of
 	# the "min" and "mon", alignment is off for new-ish and old-ish commits.
-	s/(\([0-9]\)\([^0-9]\)/ (\1\2/;
+	s/(\([0-9]\)\([^0-9 ]\)/ (\1\2/;
 ';
