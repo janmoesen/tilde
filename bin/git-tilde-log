@@ -11,7 +11,7 @@ git log --pretty=concise -n 20 "$@" | sed '
 
 	# Abbreviate the time units.
 	s/^\([^)]*\) \(s\)econds)/\1\2)/;
-	s/^\([^)]*\) minutes)/\1'\'')/;
+	s/^\([^)]*\) \(m\)inutes)/\1\2)/;
 	s/^\([^)]*\) \(h\)ours)/\1\2)/;
 	s/^\([^)]*\) \(d\)ays)/\1\2)/;
 	s/^\([^)]*\) \(w\)eeks)/\1\2)/;
@@ -20,6 +20,6 @@ git log --pretty=concise -n 20 "$@" | sed '
 
 	# Use at least two digits before the time unit for nicer alignment
 	# (until there are commits older than nine years). Of course, because of
-	# the "min" and "mon", alignment is off for new-ish and old-ish commits.
+	# "mon" for "months", alignment is off for old-ish commits.
 	s/(\([0-9]\)\([^0-9 ]\)/ (\1\2/;
 ';
