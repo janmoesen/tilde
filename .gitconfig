@@ -34,7 +34,7 @@
 	l = tilde-log
 
 	# Like "git l", but show all and draw the history graph, too.
-	ll = log --pretty=concise --graph
+	ll = tilde-log --graph
 
 	# Show a concise status of the working directory, along with the branch
 	# and the number of commits behind and/or ahead.
