@@ -2,6 +2,9 @@
 
 # This is a companion script for Tilde's .gitconfig.
 
+
+set -o pipefail;
+
 git log --pretty=concise -n 20 "$@" | sed '
 	# Change "3 weeks ago" into "3 weeks".
 	s/^\([^)]*\) ago)/\1)/;
