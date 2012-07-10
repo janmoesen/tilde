@@ -41,7 +41,7 @@ git log --pretty="format:$format_concise" -n 20 "$@" | sed '
 	s/^\([^)]*\) \(d\)ays)/\1\2)/;
 	s/^\([^)]*\) \(w\)eeks)/\1\2)/;
 	s/^\([^)]*\) \(mon\)ths)/\1 \2)/;
-	s/^\([^)]*\) \(y\)ears)/\1\2)/;
+	s/^\([^)]*\) \(y\)ear[^)]*)/\1\2)/;
 
 	# Use at least two digits before the time unit for nicer alignment
 	# (until there are commits older than nine years). Of course, because of
