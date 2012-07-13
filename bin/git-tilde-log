@@ -30,7 +30,29 @@ format_concise_parts=(
 );
 printf -v format_concise '%s' "${format_concise_parts[@]}";
 
-git log --color --pretty="format:$format_concise" -n 20 "$@" | sed '
+# If our stdout is being piped, lose the colour. Otherwise, force "git log" to
+# use "--color=always" because we pipe its stdout ourselves. (Which would make
+# Git always turn off colours when in "auto" mode.)
+git_color_option=always;
+if [ -t 1 ]; then
+	if [[ " $* " =~ \ --color=never\  ]] || [ "$(git config color.ui)" = 'never' ]; then
+		git_color_option=never;
+	else
+		git_color_option=always;
+	fi;
+else
+	if [[ " $* " =~ \ --color(=always)?\  ]] || [ "$(git config color.ui)" = 'always' ]; then
+		git_color_option=always;
+	else
+		git_color_option=never;
+	fi;
+fi;
+if [ "$git_color_option" = 'never' ]; then
+	shopt -s extglob;
+	format_concise="${format_concise//%C(+([^)]))}";
+fi;
+
+git log --color="$git_color_option" --pretty="format:$format_concise" -n 20 "$@" | sed '
 	# Change "3 weeks ago" into "3 weeks".
 	s/^\([^)]*\) ago)/\1)/;
 
