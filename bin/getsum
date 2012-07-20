@@ -1,0 +1,36 @@
+#!/usr/bin/env awk -f
+#
+# Print the sum of the first number on every line of the given files, or STDIN.
+
+# You can leave out this section and just "print sum + 0" in END.
+BEGIN {
+	sum = 0;
+	debug = 0;
+}
+
+{
+	# Get rid of leading non-numeric characters.
+	if (debug) {
+		print "before 0: ", $0;
+	}
+	sub(/^[^0-9]+/, "");
+	if (debug) {
+		print "after 0:  ", $0;
+	}
+}
+
+$1 ~ /^[0-9.]/ {
+	# Get rid of everything after the number.
+	if (debug) {
+		print "before 1: ", $1;
+	}
+	sub(/[^0-9.].*/, "");
+	if (debug) {
+		print "after 1:  ", $1;
+	}
+	sum += $1;
+}
+
+END {
+	print sum;
+}
