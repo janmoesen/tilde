@@ -84,7 +84,7 @@ alias rm='rm -i';
 alias nano='nano -w';
 alias pico='nano';
 alias vi='vim';
-export EDITOR='vim -p';
+export EDITOR='vim';
 
 # Make sure "view" as-is works when stdin is not a terminal and prevent the
 # normal ensuing keyboard input chaos.
