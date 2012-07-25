@@ -965,7 +965,11 @@ function binary-backoff {
 	local num_tries=0;
 	while [ -z "$MAX_BB_TRIES" ] || [ $num_tries -lt $MAX_BB_TRIES ]; do
 		# If successful, stop immediately.
-		"$@" && return $?;
+		"$@" && return;
+
+		# Remember the non-zero exit status.
+		exit_status=$?;
+		exit_msg="Exit status: $exit_status.";
 
 		# Check if have reached the maximum number of tries.
 		let num_tries++;
@@ -983,14 +987,14 @@ function binary-backoff {
 			[ $num_seconds_left -eq 1 ] \
 				&& local time_unit=second \
 				|| local time_unit=seconds;
-			echo "${move_up}${clear_line}Waiting for $num_seconds_left $time_unit after $num_tries tries…" 1>&2;
+			echo "${move_up}${clear_line}${exit_msg} Waiting for $num_seconds_left $time_unit after $num_tries tries…" 1>&2;
 			sleep 1;
 			let num_seconds_left--;
 		done;
 		[ $delay -eq 1 ] \
 			&& local time_unit=second \
 			|| local time_unit=seconds;
-		echo "${move_up}${clear_line}Waited for $delay $time_unit. Retrying." 1>&2;
+		echo "${move_up}${clear_line}${exit_msg} Waited for $delay $time_unit. Retrying…" 1>&2;
 
 		# Double the delay, but cap it at MAX_BB_DELAY.
 		let delay*=2;
