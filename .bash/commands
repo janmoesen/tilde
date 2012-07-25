@@ -627,7 +627,7 @@ function vack {
 		echo "$file";
 		files+=("$file");
 	done < <(bash -c "${cmd/ack/ack -l}");
-	${EDITOR:-vim -p} "${files[@]}";
+	vim -p "${files[@]}";
 }
 
 # Convert the parameters or STDIN to lowercase.
