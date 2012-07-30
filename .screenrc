@@ -19,4 +19,4 @@ hardstatus string "%-w%{= BW}%50>%n %t%{-}%+w%<"
 nonblock on
 
 # Give us much more scrollback (accessible by Ctrl+J, Esc, and then PgUp/PgDn).
-scrollback 8192
+defscrollback 8192
