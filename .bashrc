@@ -15,6 +15,12 @@
 # latter in a huge "if [ -n "$PS1" ]; then ... fi" block. That does not really
 # help readability, does it?
 #
+# (Of course, I could also do "[ -z "$PS1" ] && return;" in ~/.bashrc and still
+# source it from ~/.bash_profile, but way back when I started my .bash_profile
+# customisations, I did not know about login vs. non-login shells, nor did I
+# know you could do "return" in a sourced file. If I were to change things now,
+# I would lose my blame history, which seems too high a price to pay.)
+#
 # The difference between a login shell and an interactive non-login shell is
 # moot for me, so I consider all interactive shells to be equal and wanting
 # the same treatment.
