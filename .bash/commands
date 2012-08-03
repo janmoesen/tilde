@@ -125,7 +125,7 @@ unset less_options;
 # Make "less" transparently unpack archives etc.
 if [ -x /usr/bin/lesspipe ]; then
 	eval $(/usr/bin/lesspipe);
-elif type -t lesspipe.sh > /dev/null; then
+elif command -v lesspipe.sh > /dev/null; then
 	# MacPorts recommended "/opt/local/bin/lesspipe.sh", but this is more
 	# portable for people that have it in another directory in their $PATH.
 	eval $(lesspipe.sh);
@@ -172,10 +172,10 @@ function lman {
 
 # Clipboard access. I created these aliases to have the same command on
 # Cygwin, Linux and OS X.
-if type -t pbpaste >/dev/null; then
+if command -v pbpaste >/dev/null; then
 	alias getclip='pbpaste';
 	alias putclip='pbcopy';
-elif type -t xclip >/dev/null; then
+elif command -v xclip >/dev/null; then
 	alias getclip='xclip --out';
 	alias putclip='xclip --in';
 fi;
@@ -184,7 +184,7 @@ fi;
 alias ctags='ctags --exclude={docs,cache,tiny_mce,layout} --recurse';
 
 # OS X has no "md5sum", so use "md5" as a fall-back.
-type -t md5sum > /dev/null || alias md5sum='md5';
+command -v md5sum > /dev/null || alias md5sum='md5';
 
 # Make the "sudo" prompt more useful, without requiring access to "visudo".
 export SUDO_PROMPT='[sudo] password for %u on %h: ';
@@ -192,9 +192,9 @@ export SUDO_PROMPT='[sudo] password for %u on %h: ';
 # Version control
 # -----------------------------------------------------------------------------
 # Use "colordiff" or "highlight" to colour diffs.
-if type -t colordiff > /dev/null; then
+if command -v colordiff > /dev/null; then
 	alias difflight='colordiff | less -XFIRd';
-elif type -t highlight > /dev/null; then
+elif command -v highlight > /dev/null; then
 	alias difflight='highlight --dark-red ^-.* | highlight --dark-green ^+.* | highlight --yellow ^Only.* | highlight --yellow ^Files.*differ$ | less -XFIRd';
 else
 	alias difflight='less -XFIRd';
@@ -228,7 +228,7 @@ function git-show-branch {
 # -----------------------------------------------------------------------------
 # Show a unified diff, colourised if possible and paged if necessary.
 function udiff {
-	type -t colordiff > /dev/null \
+	command -v colordiff > /dev/null \
 		&& local command=colordiff \
 		|| local command=diff;
 	"$command" -wU4 -x .svn "$@" | less -XFIRd;
@@ -294,7 +294,7 @@ function show {
 }
 
 # Use "hd" for the canonical hex dump. (Some systems have this symlinked.)
-type -t hd > /dev/null || alias hd='hexdump -C';
+command -v hd > /dev/null || alias hd='hexdump -C';
 
 # Backups
 # -----------------------------------------------------------------------------
@@ -745,7 +745,7 @@ function wtfis {
 				# Show the output from "type" without ANSI escapes.
 				echo "${type//$'\e'/\\033}";
 
-				case "$(type -t "$cmd")" in
+				case "$(command -v "$cmd")" in
 					'alias')
 						local alias_="$(alias "$cmd")";
 						# The output looks like "alias foo='bar'"; so
