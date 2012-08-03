@@ -252,7 +252,7 @@ for file in "${source_files[@]}"; do
 	# "src/tilde/.bashrc" rather than "/home/janmoesen/src/tilde/.bashrc" when
 	# installing from "/home/janmoesen/src/tilde".)
 	relative_source="$relative_source_dir";
-	if [[ "$file" =~ / ]]; then
+	if [ "${relative_source:0:1}" != '/' ] && [[ "$file" =~ / ]]; then
 		# If the file is not in the repository's root, we need to go up
 		# additional levels for the relative path.
 		IFS=/ read -a file_dir_parts <<< "$(dirname "$file")";
