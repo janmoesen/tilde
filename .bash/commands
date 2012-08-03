@@ -228,10 +228,15 @@ function git-show-branch {
 # -----------------------------------------------------------------------------
 # Show a unified diff, colourised if possible and paged if necessary.
 function udiff {
-	command -v colordiff > /dev/null \
-		&& local command=colordiff \
-		|| local command=diff;
-	"$command" -wU4 -x .svn "$@" | less -XFIRd;
+	if command -v colordiff > /dev/null; then
+		colordiff -wU4 "$@" | $PAGER;
+		return ${PIPESTATUS[0]};
+	elif command -v git > /dev/null && ! [[ " $* " =~ \ /dev/fd ]]; then
+		git diff --no-index "$@";
+		return $?;
+	fi;
+
+	diff -wU4 -x .svn "$@" | $PAGER;
 	return ${PIPESTATUS[0]};
 }
 
