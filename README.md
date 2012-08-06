@@ -9,6 +9,6 @@ To install, execute:
 To update an existing install, go to Tilde's directory and execute:
     `git pull && ./install.sh`
 
-Jan Moesen, 2011
+Jan Moesen
 
 See COPYING for licence details.
