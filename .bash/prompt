@@ -80,3 +80,9 @@ if [ "${TERM#xterm}" != "$TERM" -o "${TERM#screen}" != "$TERM" ]; then
 	export PS1=$'\\[\e]0;'"$title_string"$'\a'"\\]$PS1";
 	unset title_string;
 fi;
+
+# Restore the original prompts for multiline commands (PS2), select prompts
+# (PS3) and execution traces (PS4).
+export PS2='> ';
+unset PS3; # This is unset initially and seems to default to "#? ".
+export PS4='+ ';
