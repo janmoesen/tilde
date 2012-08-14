@@ -1,0 +1,10 @@
+#!/bin/bash
+#
+# Remove ANSI colour escapes from stdin.
+#
+# (Note the American spelling, "decolorize", to fit in with the OS.)
+
+# Remove "\e[31;1m" etc. ("sed 's/\033..'" did not work for me.)
+# Note that http://www.pixelbeat.org/scripts/ansi2html.sh contains many more
+# escapes to replace, but I only really care about colours and font styles.
+sed $'s/\e''\[[0-9][^m]*m//g';
