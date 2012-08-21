@@ -16,17 +16,17 @@ format_concise_parts=(
 	'%C(yellow)%h%C(reset) '
 
 	# Relative date (age). E.g., "3 days ago". Abbreviated by "sed" below.
-	'%C(bold black)(%ar)%C(reset) '
+	'%C(blue)(%ar)%C(reset) '
 
 	# Subject. E.g., "Homepage: add Frobnitz widget".
 	'%s '
 
 	# Author name. E.g., "Jan Moesen".
-	'%C(bold black)(%an)%C(reset)'
+	'%C(blue)(%an)%C(reset)'
 
 	# Branches. (Always wrapped in parentheses and preceded by a space.)
 	# E.g., "(HEAD, origin/master, origin/frobnitz)
-	'%C(bold blue)%d%C(reset)'
+	'%d'
 );
 printf -v format_concise '%s' "${format_concise_parts[@]}";
 
