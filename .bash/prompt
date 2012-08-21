@@ -81,14 +81,15 @@ if [ "${TERM#xterm}" != "$TERM" -o "${TERM#screen}" != "$TERM" ]; then
 	unset title_string;
 fi;
 
-# Restore the original prompts for multiline commands (PS2) and select prompts
-# (PS2).
+# Restore the original prompt for multiline commands (PS2). This overrides any
+# system-wide customisations in /etc/profile, for instance.
 export PS2='> ';
-unset PS3; # This is unset initially and seems to default to "#? ".
 
-# Include the current file and line number when tracing using "set -x". (You
-# can also include "\$FUNCNAME" to get the currently executing function, if
-# any.)
+# Restore the original prompt for select menus. This is unset initially and
+# seems to default to "#? ".
+unset PS3;
+
+# Include the current file and line number when tracing using "set -x" (PS4).
 ps4_parts=(
 	# Same as the default: start with a plus sign that gets repeated based on
 	# the current stack depth. (Bash repeats the first character of PS4.)
