@@ -30,29 +30,6 @@ done;
 unset available_locales lang locale;
 
 
-# History
-# -----------------------------------------------------------------------------
-# When the command contains an invalid history operation (for instance when
-# using an unescaped "!" (I get that a lot in quick e-mails and commit
-# messages) or a failed substitution (e.g. "^foo^bar" when there was no "foo"
-# in the previous command line), do not throw away the command line, but let me
-# correct it.
-shopt -s histreedit;
-
-# Keep a reasonably long history.
-export HISTSIZE=4096;
-
-# Keep even more history lines inside the file, so we can still look up
-# previous commands without needlessly cluttering the current shell's history.
-export HISTFILESIZE=16384;
-
-# When executing the same command twice or more in a row, only store it once.
-export HISTCONTROL=ignoredups;
-
-# Keep track of the time the commands were executed.
-# The xterm colour escapes require special care when piping; e.g. "| less -R".
-export HISTTIMEFORMAT=$'\e[1;30m%Y/%m/%d %H:%M:%S\e[0m  ';
-
 # ANSI colours and font properties for xterm
 # -----------------------------------------------------------------------------
 # See http://invisible-island.net/xterm/ctlseqs/ctlseqs.html
@@ -79,3 +56,26 @@ unset i color style;
 export FONT_NOT_BOLD=$'\e[22m';
 # Reset the font style, but not the color. (Unlike $FONT_RESET.)
 export FONT_NORMAL="${FONT_NOT_BOLD}${FONT_NOT_UNDERLINE}${FONT_NOT_BLINK}${FONT_NOT_REVERSE}${FONT_NOT_HIDDEN}";
+
+# History
+# -----------------------------------------------------------------------------
+# When the command contains an invalid history operation (for instance when
+# using an unescaped "!" (I get that a lot in quick e-mails and commit
+# messages) or a failed substitution (e.g. "^foo^bar" when there was no "foo"
+# in the previous command line), do not throw away the command line, but let me
+# correct it.
+shopt -s histreedit;
+
+# Keep a reasonably long history.
+export HISTSIZE=4096;
+
+# Keep even more history lines inside the file, so we can still look up
+# previous commands without needlessly cluttering the current shell's history.
+export HISTFILESIZE=16384;
+
+# When executing the same command twice or more in a row, only store it once.
+export HISTCONTROL=ignoredups;
+
+# Keep track of the time the commands were executed.
+# The xterm colour escapes require special care when piping; e.g. "| less -R".
+export HISTTIMEFORMAT=$'\e[1;30m%Y/%m/%d %H:%M:%S\e[0m  ';
