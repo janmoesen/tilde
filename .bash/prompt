@@ -81,8 +81,47 @@ if [ "${TERM#xterm}" != "$TERM" -o "${TERM#screen}" != "$TERM" ]; then
 	unset title_string;
 fi;
 
-# Restore the original prompts for multiline commands (PS2), select prompts
-# (PS3) and execution traces (PS4).
+# Restore the original prompts for multiline commands (PS2) and select prompts
+# (PS2).
 export PS2='> ';
 unset PS3; # This is unset initially and seems to default to "#? ".
-export PS4='+ ';
+
+# Include the current file and line number when tracing using "set -x". (You
+# can also include "\$FUNCNAME" to get the currently executing function, if
+# any.)
+ps4_parts=(
+	# Same as the default: start with a plus sign that gets repeated based on
+	# the current stack depth. (Bash repeats the first character of PS4.)
+	'+ '
+
+	# Make the following extra information stand out less.
+	"${FG_BLUE}${FONT_BOLD}"
+
+	# Show the name of the current shell function, if any.
+	'${FUNCNAME}'
+
+	# Show the basename and line number of the source file or function, if
+	# any. If there was a function name, put an "@" between the function name
+	# and the file/function.
+	'${BASH_SOURCE:+${FUNCNAME:+@}}'
+
+	# Note that LINENO is reset from 1 inside a function body. Sometimes,
+	# $LINENO is a negative number. I could not find any reference to this in
+	# the man page, but it seems to have to happen when returning from another
+	# function. Until I understand this more completely, I wrap it in
+	# parentheses to clarify that it is not a regular line number.
+	'${BASH_SOURCE:+${BASH_SOURCE##*/}:${LINENO/#-*/($LINENO)}}'
+
+	# Use a tab to separate the file/function and line number from the actual
+	# line of code, rather than a space, because this helps legibility. (It
+	# decreases the "jaggedness" caused by differing lengthts of file names
+	# and line numbers.) I prefer this to a newline because it keeps the trace
+	# more compact.
+	$'\t'
+
+	# Reset the colour and style.
+	"${FONT_RESET}"
+);
+printf -v PS4 '%s' "${ps4_parts[@]}";
+export PS4;
+unset ps4_parts;
