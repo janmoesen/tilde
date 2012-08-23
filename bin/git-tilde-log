@@ -26,7 +26,7 @@ format_concise_parts=(
 
 	# Branches. (Always wrapped in parentheses and preceded by a space.)
 	# E.g., "(HEAD, origin/master, origin/frobnitz)
-	'%d'
+	'%C(bold yellow)%d%C(reset)'
 );
 printf -v format_concise '%s' "${format_concise_parts[@]}";
 
