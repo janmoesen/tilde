@@ -181,7 +181,9 @@ elif command -v xclip >/dev/null; then
 fi;
 
 # Make "ctags" recurse by default.
-alias ctags='ctags --exclude={docs,cache,tiny_mce,layout} --recurse';
+if command -v ctags > /dev/null; then
+	alias ctags='ctags --exclude={docs,cache,tiny_mce,layout} --recurse';
+fi;
 
 # OS X has no "md5sum", so use "md5" as a fall-back.
 command -v md5sum > /dev/null || alias md5sum='md5';
