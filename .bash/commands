@@ -97,6 +97,7 @@ function view {
 	command view "${args[@]}";
 }
 
+# Make less the default pager, and specify some useful defaults.
 less_options=(
 	# If the entire text fits on one screen, just show it and quit. (Be more
 	# like "cat" and less like "more".)
@@ -120,8 +121,10 @@ less_options=(
 	# Do not complain when we are on a dumb terminal.
 	--dumb
 );
-export PAGER="less ${less_options[*]}";
+export LESS="${less_options[*]}";
 unset less_options;
+export PAGER='less';
+
 # Make "less" transparently unpack archives etc.
 if [ -x /usr/bin/lesspipe ]; then
 	eval $(/usr/bin/lesspipe);
