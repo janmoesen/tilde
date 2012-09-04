@@ -57,12 +57,12 @@ git log --color="$git_color_option" --pretty="format:$format_concise" -n 20 "$@"
 	s/^([^)]*) ago\)/\1)/;
 
 	# Abbreviate the time units.
-	s/^([^)]*) (s)econds\)/\1\2)/;
-	s/^([^)]*) (m)inutes\)/\1\2)/;
-	s/^([^)]*) (h)ours\)/\1\2)/;
-	s/^([^)]*) (d)ays\)/\1\2)/;
-	s/^([^)]*) (w)eeks\)/\1\2)/;
-	s/^([^)]*) (mon)ths\)/\1 \2)/;
+	s/^([^)]*) (s)econd(s?)\)/\1\2)/;
+	s/^([^)]*) (m)inute(s?)\)/\1\2)/;
+	s/^([^)]*) (h)our(s?)\)/\1\2)/;
+	s/^([^)]*) (d)ay(s?)\)/\1\2)/;
+	s/^([^)]*) (w)eek(s?)\)/\1\2)/;
+	s/^([^)]*) (mon)th(s?)\)/\1 \2)/;
 	s/^([^)]*) (y)ear[^)]*\)/\1\2)/;
 
 	# Use at least two digits before the time unit for nicer alignment
