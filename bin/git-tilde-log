@@ -52,7 +52,7 @@ if [ "$git_color_option" = 'never' ]; then
 	format_concise="${format_concise//%C(+([^)]))}";
 fi;
 
-git log --color="$git_color_option" --pretty="format:$format_concise" -n 20 "$@" | sed -E '
+git log --color="$git_color_option" --pretty="format:$format_concise" -n 20 "$@" | perl -p -e '
 	# Change "3 weeks ago" into "3 weeks".
 	s/^([^)]*) ago\)/\1)/;
 
