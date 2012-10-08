@@ -5,8 +5,8 @@
 --smart-case
 
 # HTML templates.
---type-set=tpl=.tpl
---type-add=html=.tpl
+--type-set=tpl=.tpl,.twig
+--type-add=html=.tpl,.twig
 
 # PHP includes.
 --type-add=php=inc
