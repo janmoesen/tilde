@@ -5,9 +5,7 @@
 "\e[B": history-search-forward
 "\e[A": history-search-backward
 
-# Remember the cursor position for each history line. Note that this only works
-# for previous-history and next-history, and apparently not (or not so well)
-# with my Up/Down key bindings history-search-{back,for}ward.
+# Try to stay at the same the cursor position when moving through the history.
 set history-preserve-point on
 
 # Autocompletion
