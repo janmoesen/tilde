@@ -73,8 +73,9 @@ unset method;
 # -----------------------------------------------------------------------------
 # I know it is bad practice to override the default commands, but this is for
 # my own safety. If you really want the original "instakill" versions, you can
-# still use "command rm" or "/bin/rm" inside your commands, aliases, functions
-# or scripts.
+# use "command rm", "\rm", or "/bin/rm" inside your own commands, aliases, or
+# shell functions. Note that separate scripts are not affected by the aliases
+# defined here.
 alias cp='cp -i';
 alias mv='mv -i';
 alias rm='rm -i';
