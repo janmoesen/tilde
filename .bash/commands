@@ -53,12 +53,6 @@ printf -v PATH "%s:" "${new_paths[@]}";
 export PATH="${PATH%:}";
 unset {old,new}_path{,s} path{s,}_to_add;
 
-# Override MacPorts' SSH binaries.
-for binary in /usr/bin/ssh*; do
-	[ -x "$binary" ] && hash -p "$binary" "$(basename "$binary")";
-done;
-unset binary;
-
 # Prefer Homebrew's netcat
 [ -x /usr/local/bin/netcat ] && hash -p /usr/local/bin/netcat nc;
 
