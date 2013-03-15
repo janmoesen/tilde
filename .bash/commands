@@ -859,12 +859,8 @@ function wtfis {
 #   $ whenis 1979-10-14T12:00:00.001-04:00 # HTML5 global date and time
 #   Sun Oct 14 17:00:00 CET 1979
 #
-#   $ (TZ=America/Vancouver whenis) # Current time in Vancouver
+#   $ TZ=America/Vancouver whenis # Current time in Vancouver
 #   Thu Oct 20 13:04:20 PDT 2011
-#
-# When requesting a different timezone like in the last example, make sure to
-# execute the command in a subshell to avoid changing your timezone for the
-# rest of the session.
 #
 # For more info, check out http://kak.be/gnudateformats.
 function whenis {
