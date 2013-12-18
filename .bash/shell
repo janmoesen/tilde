@@ -79,3 +79,29 @@ export HISTCONTROL=ignoredups;
 # Keep track of the time the commands were executed.
 # The xterm colour escapes require special care when piping; e.g. "| less -R".
 export HISTTIMEFORMAT="${FG_BLUE}${FONT_BOLD}%Y/%m/%d %H:%M:%S${FONT_RESET}  ";
+
+# Screen sessions
+# -----------------------------------------------------------------------------
+# Enable SSH agent forwarding ("ForwardAgent yes"/"ssh -A") with persistent
+# screen sessions.
+if [ "$TERM" != 'screen' ]; then
+	# Persist the variable so we can source it in existing sessions.
+	if [ -n "$SSH_AUTH_SOCK" ]; then
+		if [ ! -d ~/.ssh ]; then
+			mkdir -p ~/.ssh;
+			chmod 700 ~/.ssh;
+		fi;
+		printf 'export SSH_AUTH_SOCK=%q\n' "$SSH_AUTH_SOCK" >| ~/.ssh/environment.screen;
+	fi;
+else
+	# Re-read the variable after each command. This may seem like overkill,
+	# but the screen session could have been detached and then reattached from
+	# another SSH session, so you never know when the SSH authentication
+	# socket might have changed.
+	export PROMPT_COMMAND="
+		ret=$?;
+		[ -f ~/.ssh/environment.screen ] && source ~/.ssh/environment.screen;
+		(exit $ret);
+		${PROMPT_COMMAND:-}
+	";
+fi;
