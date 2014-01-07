@@ -1,0 +1,12 @@
+# Do not show "colordiff 1.2.3 (http://…)" at the top of the output.
+banner=no
+
+# Do not include colours when piping or redirecting the output.
+color_patches=no
+
+# Use Git-like colours.
+plain=off
+newtext=darkgreen
+oldtext=darkred
+diffstuff=darkcyan
+cvsstuff=darkcyan
