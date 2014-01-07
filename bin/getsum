@@ -13,18 +13,18 @@ BEGIN {
 	if (debug) {
 		print "before 0: ", $0;
 	}
-	sub(/^[^0-9]+/, "");
+	sub(/^[^0-9-]+/, "");
 	if (debug) {
 		print "after 0:  ", $0;
 	}
 }
 
-$1 ~ /^[0-9.]/ {
+$1 ~ /^-?[0-9.]/ {
 	# Get rid of everything after the number.
 	if (debug) {
 		print "before 1: ", $1;
 	}
-	sub(/[^0-9.].*/, "");
+	sub(/[^0-9.-].*/, "");
 	if (debug) {
 		print "after 1:  ", $1;
 	}
