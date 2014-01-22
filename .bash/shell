@@ -99,9 +99,10 @@ else
 	# another SSH session, so you never know when the SSH authentication
 	# socket might have changed.
 	export PROMPT_COMMAND="
-		ret=$?;
+		ret=\$?;
 		[ -f ~/.ssh/environment.screen ] && source ~/.ssh/environment.screen;
-		(exit $ret);
+		function __return { unset __return; return \$1; }
+		__return \$ret;
 		${PROMPT_COMMAND:-}
 	";
 fi;
