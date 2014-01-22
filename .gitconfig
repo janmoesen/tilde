@@ -36,6 +36,9 @@
 	# Like "git l", but show all and draw the history graph, too.
 	ll = tilde-log --graph
 
+	# Like "git l", but for the reflog.
+	rl = tilde-reflog
+
 	# Show a concise status of the working directory, along with the branch
 	# and the number of commits behind and/or ahead.
 	s = status --short --branch
