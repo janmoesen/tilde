@@ -6,8 +6,8 @@
 # https://github.com/garybernhardt/dotfiles/commit/62a932b9
 # https://github.com/garybernhardt/dotfiles/commit/17e89bf4
 
-# Return the exit status of "git log" (assuming "sed" always has an exit status
-# of 0).
+# Return the exit status of "git log" (assuming "perl -pe s/foo/bar/" always
+# has an exit status of 0).
 set -o pipefail;
 
 # Format the log as multicolour lines highlighting the parts I care about most.
@@ -15,7 +15,7 @@ format_concise_parts=(
 	# Abbreviated commit hash. E.g., "b4db4be".
 	'%C(yellow)%h%C(reset) '
 
-	# Relative date (age). E.g., "3 days ago". Abbreviated by "sed" below.
+	# Relative date (age). E.g., "3 days ago". Abbreviated by "perl" below.
 	'%C(blue)(%ar)%C(reset) '
 
 	# Subject. E.g., "Homepage: add Frobnitz widget".
