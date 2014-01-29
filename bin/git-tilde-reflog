@@ -22,7 +22,7 @@ format_concise_parts=(
 	'%gd '
 
 	# Reflog subject. E.g., "commit: Homepage: add Frobnitz widget".
-	'%gs '
+	'%gs'
 
 	# Branches. (Always wrapped in parentheses and preceded by a space.)
 	# E.g., "(HEAD, origin/master, origin/frobnitz)
