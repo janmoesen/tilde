@@ -500,7 +500,7 @@ function top10 {
 		# Mac OS X's top does not calculate the CPU usage when sampling only
 		# once. So, sample twice and only keep the output of the second
 		# sample. This makes it seem very slow, but them's the breaks.
-		local output="$(top -l 2 -n 10 -o CPU -stats PID,USER,CPU,VSIZE,RSIZE,RSHRD,STATE,TIME,COMMAND)";
+		local output="$(top -l 2 -n 10 -o CPU -stats PID,USER,CPU,VSIZE,RSIZE,STATE,TIME,COMMAND)";
 		output="$(tail -n "$(($(wc -l <<< "$output") / 2))" <<< "$output")";
 	else
 		# Debian's top (and possibly other Linux versions) does not allow
