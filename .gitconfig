@@ -9,6 +9,10 @@
 [color]
 	ui = auto
 
+[color.grep]
+	filename = bold green
+	match = black yellow
+
 [merge]
 	tool = vimdiff
 
@@ -63,3 +67,8 @@
 	# simply have created a new branch called "password". (I would be forced
 	# to use "--" to separate paths from banch names, which is a Good Thing™.)
 	go = checkout -B
+
+	# Make "git grep" look a bit like "ack"/"ag". Note that you need to
+	# specify --no-index to search all files, and that submodules are not
+	# searched.
+	ack = grep --extended-regexp --break --heading --line-number
