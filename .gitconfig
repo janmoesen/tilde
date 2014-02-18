@@ -43,15 +43,6 @@
 	# and the number of commits behind and/or ahead.
 	s = status --short --branch
 
-	# Quickly push to the most common destination.
-	pom = push origin master
-
-	# I know "pum" could just as well stand for "PUsh" instead of "PUll", but
-	# I am so used to "git pom" that "git pum" feels like a natural
-	# counterpart. I always try to rebase to prevent unnecessary merge
-	# commits.
-	pum = pull --rebase origin master
-
 	# Show the staged changes.
 	dc = diff --cached
 
