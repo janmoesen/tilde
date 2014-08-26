@@ -1,5 +1,10 @@
 [core]
+	# Use a global .gitignore file.
 	excludesfile = ~/.gitignore
+
+	# Enable parallel I/O for operations like "git diff".
+	# See http://stackoverflow.com/q/18257622/276478
+	preloadindex = true
 
 [color]
 	ui = auto
@@ -7,6 +12,15 @@
 [color.grep]
 	filename = bold green
 	match = black yellow
+
+[diff]
+	# Use more time to create better diffs. E.g. matching opening/closing braces
+	# from neighbour functions.
+	algorithm = patience
+
+	# Tells Git to detect renames. If set to "true", it will enable basic
+	# rename detection. If set to "copies", it will detect copies, as well.
+	renames = copies
 
 [merge]
 	tool = vimdiff
