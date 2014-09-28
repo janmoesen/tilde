@@ -13,6 +13,7 @@
 	abbrev = 12
 
 [color]
+	# Use colors by default when the output is a terminal that supports them.
 	ui = auto
 
 [color.grep]
