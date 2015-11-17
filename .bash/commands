@@ -653,24 +653,6 @@ function uc {
 	fi;
 }
 
-# Use PHP's built-in support to encode and decode base64.
-function base64 {
-	if [ $# -eq 0 ]; then
-		 echo 'Usage: base64 [encode|decode] <string>';
-		 return;
-	fi;
-	local action='decode';
-	if [ "$1" = 'decode' ]; then
-		action='decode';
-		shift;
-	elif [ "$1" = 'encode' ]; then
-		action='encode';
-		shift;
-	fi;
-	echo "$@" | php -r "echo base64_$action(file_get_contents('php://stdin'));";
-	echo;
-}
-
 # Highlight STDIN based on PCRE patterns.
 function highlight {
 	local color=33;
