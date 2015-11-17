@@ -491,41 +491,36 @@ function process-tree {
 
 # Show the top 10 processes.
 function top10 {
-	# Default columns displayed by "top" on Debian Linux and Mac OS X:
-	#         1   2    3  4  5    6   7   8 9    10   11    12
-	# Linux:  PID USER PR NI VIRT RES SHR S %CPU %MEM TIME+ COMMAND
-	# Darwin: PID COMMAND %CPU TIME #TH #WQ #PORTS #MREGS RPRVT RSHRD RSIZE VPRVT VSIZE PGRP PPID STATE UID FAULTS COW MSGSENT MSGRECV SYSBSD SYSMACH CSW PAGEINS USER
-	#         1   2       3    4    5   6   7      8      9     10    11    12    13    14   15   16    17  18     19  20      21      22     23      24  25      26
 	if [[ "$OSTYPE" =~ ^darwin ]]; then
 		# Mac OS X's top does not calculate the CPU usage when sampling only
 		# once. So, sample twice and only keep the output of the second
 		# sample. This makes it seem very slow, but them's the breaks.
-		local output="$(top -l 2 -n 10 -o CPU -stats PID,USER,CPU,VSIZE,RSIZE,STATE,TIME,COMMAND)";
-		output="$(tail -n "$(($(wc -l <<< "$output") / 2))" <<< "$output")";
+		local options=(
+			-l 2    # Sample twice
+			-n 10   # Only show the top 10 processes
+			-o CPU  # Order by CPU usage
+			-stats PID,USER,CPU,VSIZE,RSIZE,STATE,TIME,COMMAND
+		);
+
+		# Let's ass-u-me that the output of one sample run always consists of
+		# a few header lines, a blank line, the column header line, and the
+		# process lines. In that case, the second run starts 12 lines after
+		# the first blank line. Unless there are less than 10 processes,
+		# which would be very, very unlikely.
+		ex <(top "${options[@]}") <<< '/^$/+12,$p';
 	else
 		# Debian's top (and possibly other Linux versions) does not allow
-		# requesting specific fields on the command line, so create a
-		# temporary .toprc somewhere and use that. The "fieldscur" below
-		# correspond to the "-stats" option for OS X's "top". See above.
-		local tmp_dir="$(mktemp -d -t "top10.$$.XXXX")";
-		cat > "$tmp_dir/.toprc" <<-EOD
-			RCfile for "top with windows"		# shameless braggin'
-			Id:a, Mode_altscr=0, Mode_irixps=1, Delay_time=3.000, Curwin=0
-			Def	fieldscur=AEKhiOQTWnMbcdfgjplrsuvyzX
-				winflags=62777, sortindx=10, maxtasks=0
-				summclr=1, msgsclr=1, headclr=3, taskclr=1
-		EOD
-		local output="$(HOME="$tmp_dir"; top -bn 1)";
-		rm -rf "$tmp_dir";
-	fi;
+		# requesting specific fields on the command line, or limiting the
+		# number of processes to show. We use "ex" to print everything from
+		# the first line up to and including the 11 lines following the blank
+		# line that separates the header and the process list.
+		local options=(
+			-b      # Batch mode
+			-n 1    # Run once
+		);
 
-	# Output the result, and use "column" to align the process columns a bit
-	# better than "top" itself does. This does screw up the command names when
-	# they contain a space, e.g. "Chromium Helper" => "Chromium     Helper".
-	local pid_start_line="$(egrep -nm1 '^\s*PID' <<< "$output" || echo 65536)";
-	pid_start_line="${pid_start_line%:*}";
-	head -n $(($pid_start_line - 1)) <<< "$output";
-	tail -n +$pid_start_line <<< "$output" | head -n 11 | column -t;
+		ex <(top "${options[@]}") <<< '1,/^$/+11p';
+	fi;
 }
 
 # Sort the "du" output and use human-readable units.
