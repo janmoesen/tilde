@@ -489,37 +489,12 @@ function process-tree {
 	echo "${output//$separator/ $separator }";
 }
 
-# Show the top 10 processes.
+# Show the top 10 processes by CPU usage.
 function top10 {
 	if [[ "$OSTYPE" =~ ^darwin ]]; then
-		# Mac OS X's top does not calculate the CPU usage when sampling only
-		# once. So, sample twice and only keep the output of the second
-		# sample. This makes it seem very slow, but them's the breaks.
-		local options=(
-			-l 2    # Sample twice
-			-n 10   # Only show the top 10 processes
-			-o CPU  # Order by CPU usage
-			-stats PID,USER,CPU,VSIZE,RSIZE,STATE,TIME,COMMAND
-		);
-
-		# Let's ass-u-me that the output of one sample run always consists of
-		# a few header lines, a blank line, the column header line, and the
-		# process lines. In that case, the second run starts 12 lines after
-		# the first blank line. Unless there are less than 10 processes,
-		# which would be very, very unlikely.
-		ex <(top "${options[@]}") <<< '/^$/+12,$p';
+		ps waux -r | head -n 11;
 	else
-		# Debian's top (and possibly other Linux versions) does not allow
-		# requesting specific fields on the command line, or limiting the
-		# number of processes to show. We use "ex" to print everything from
-		# the first line up to and including the 11 lines following the blank
-		# line that separates the header and the process list.
-		local options=(
-			-b      # Batch mode
-			-n 1    # Run once
-		);
-
-		ex <(top "${options[@]}") <<< '1,/^$/+11p';
+		ps waux --sort='-%cpu' | head -n 11;
 	fi;
 }
 
