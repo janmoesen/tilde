@@ -878,6 +878,11 @@ function viewlast {
 	(EDITOR=view vilast "$@");
 }
 
+# A quick way to "tail -f" the last file. See "vilast".
+function taillast {
+	(($#)) && tail -f "${!#}";
+}
+
 # Keep executing the given command until it returns 0. If it did not,
 # sleep for 1 second and try again. If still not successful, sleep for 2
 # seconds, and try again. Next, sleep for 4, 8, 16, … seconds (capped at
