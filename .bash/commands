@@ -489,13 +489,13 @@ function process-tree {
 	echo "${output//$separator/ $separator }";
 }
 
-# Show the top 10 processes by CPU usage.
+# Show the uptime (including load) and the top 10 processes by CPU usage.
 function top10 {
 	if [[ "$OSTYPE" =~ ^darwin ]]; then
-		ps waux -r | head -n 11;
+		ps waux -r;
 	else
-		ps waux --sort='-%cpu' | head -n 11;
-	fi;
+		ps waux --sort='-%cpu';
+	fi | head -n 11 | cut -c "1-${COLUMNS:-80}";
 }
 
 # Sort the "du" output and use human-readable units.
