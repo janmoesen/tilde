@@ -491,6 +491,7 @@ function process-tree {
 
 # Show the uptime (including load) and the top 10 processes by CPU usage.
 function top10 {
+	uptime;
 	if [[ "$OSTYPE" =~ ^darwin ]]; then
 		ps waux -r;
 	else
