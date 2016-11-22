@@ -12,6 +12,10 @@
 	# http://blog.cuviper.com/2013/11/10/how-short-can-git-abbreviate/
 	abbrev = 12
 
+	# Use (a copy of) the "diff-highlight" contrib script for more readable diffs.
+	# Get it at <https://raw.githubusercontent.com/git/git/master/contrib/diff-highlight/diff-highlight>
+	pager = diff-highlight | less
+
 [color]
 	# Use colors by default when the output is a terminal that supports them.
 	ui = auto
