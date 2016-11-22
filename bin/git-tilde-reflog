@@ -12,14 +12,14 @@ set -o pipefail;
 
 # Format the log as multicolour lines highlighting the parts I care about most.
 format_concise_parts=(
+	# Shortened reflog selector, e.g. "HEAD@{0}".
+	'%gd '
+
 	# Abbreviated commit hash. E.g., "b4db4be".
 	'%C(yellow)%h%C(reset) '
 
 	# Relative date (age). E.g., "3 days ago". Abbreviated by "perl" below.
 	'%C(blue)(%ar)%C(reset) '
-
-	# Shortened reflog selector, e.g. "HEAD@{0}".
-	'%gd '
 
 	# Reflog subject. E.g., "commit: Homepage: add Frobnitz widget".
 	'%gs'
@@ -53,6 +53,9 @@ if [ "$git_color_option" = 'never' ]; then
 fi;
 
 git log --walk-reflogs --color="$git_color_option" --pretty="format:$format_concise" -n 20 "$@" | perl -p -e '
+	# Change "HEAD@{n}" into "HEAD@{n} ".
+	s/(HEAD\@\{\d})/\1 /;
+
 	# Change "3 weeks ago" into "3 weeks".
 	s/^([^)]*) ago\)/\1)/;
 
