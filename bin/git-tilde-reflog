@@ -69,4 +69,4 @@ git log --walk-reflogs --color="$git_color_option" --pretty="format:$format_conc
 	# (until there are commits older than nine years). Of course, because of
 	# "mon" for "months", alignment is off for old-ish commits.
 	s/\(([0-9])([^0-9 ])/ (\1\2/;
-' | $(git var GIT_PAGER);
+' | sh -c "$(git var GIT_PAGER)";
