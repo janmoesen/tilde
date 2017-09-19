@@ -887,8 +887,8 @@ function taillast {
 # Keep executing the given command until it returns 0. If it did not,
 # sleep for 1 second and try again. If still not successful, sleep for 2
 # seconds, and try again. Next, sleep for 4, 8, 16, … seconds (capped at
-# MAX_BB_DELAY, which defaults to 900, or 15 minutes), until the maximum
-# number of tries (MAX_BB_TRIES, defaults to unlimited) has been reached.
+# BB_MAX_DELAY, which defaults to 900, or 15 minutes), until the maximum
+# number of tries (BB_MAX_TRIES, defaults to unlimited) has been reached.
 #
 # Note that it is not the "true" binary exponential back-off as the delay is
 # not randomly chosen, but simply doubled each time.
@@ -903,28 +903,54 @@ function taillast {
 # This will immediately try to set up an SSH tunnel, retrying until successful.
 # If the first try does not succeed, it pauses for 1 second. Then, if still not
 # successful, for 2 seconds. Next, 4 seconds, 8 seconds, and so on. The maximum
-# delay can be specified using MAX_BB_DELAY and defaults to 1 hour. You can set
-# a maximum number of tries using the MAX_BB_TRIES variable.
+# delay can be specified using the --max-delay=N option or the BB_MAX_DELAY
+# environment variable. It defaults to 15 minutes. You can also set the maximum
+# number of tries using the --max-tries option or the BB_MAX_TRIES environment
+# variable.
 function binary-backoff {
-	# Configuration check.
-	local max_delay="${MAX_BB_DELAY:-900}";
-	if ! (($#)); then
+	# Configuration.
+	local max_delay="${BB_MAX_DELAY:-900}";
+	local max_tries="${BB_MAX_TRIES:-0}";
+
+	local can_expect_options=true;
+	local command=();
+	local arg;
+
+	for arg; do
+		if [ "$arg" = '--' ]; then
+			can_expect_options=false;
+		elif [ "${arg:0:2}" = '--' ] && $can_expect_options; then
+			if [[ "$arg" =~ ^--max-delay=(.*) ]]; then
+				max_delay="${BASH_REMATCH[1]}";
+			elif [[ "$arg" =~ ^--max-tries=(.+) ]]; then
+				max_tries="${BASH_REMATCH[1]}";
+			else
+				echo "Invalid option: \"$arg\"." 1>&2;
+				return 1;
+			fi;
+		else
+			command+=("$arg");
+			can_expect_options=false;
+		fi;
+	done;
+
+	if ! ((${#command[@]})); then
 		echo 'You have to specify a command to execute.' 1>&2;
 		return 127;
 	elif ! [[ "$max_delay" =~ ^[1-9][0-9]*$ ]]; then
-		echo 'MAX_BB_DELAY has to be a positive integer' 1>&2;
+		echo '--max-delay/BB_MAX_DELAY has to be a positive integer.' 1>&2;
 		return 1;
-	elif [ -n "$MAX_BB_TRIES" ] && ! [[ "$MAX_BB_TRIES" =~ ^[1-9][0-9]*$ ]]; then
-		echo 'MAX_BB_TRIES has to be a positive integer' 1>&2;
+	elif [ -n "$max_tries" ] && ! [[ "$max_tries" =~ ^[0-9]+$ ]]; then
+		echo '--max-tries/BB_MAX_TRIES has to be a non-negative integer.' 1>&2;
 		return 1;
 	fi;
 
 	# Start trying.
 	local delay=1;
 	local num_tries=0;
-	while [ -z "$MAX_BB_TRIES" ] || [ $num_tries -lt $MAX_BB_TRIES ]; do
+	while [ $max_tries -eq 0 ] || [ $num_tries -lt $max_tries ]; do
 		# If successful, stop immediately.
-		"$@" && return;
+		"${command[@]}" && return;
 
 		# Remember the non-zero exit status.
 		exit_status=$?;
@@ -932,30 +958,37 @@ function binary-backoff {
 
 		# Check if have reached the maximum number of tries.
 		let num_tries++;
-		if [ -n "$MAX_BB_TRIES" ] && [ $num_tries -ge $MAX_BB_TRIES ]; then
-			echo "Stopping after $MAX_BB_TRIES tries…" 1>&2;
-			echo "Stopping after $num_tries tries…" 1>&2;
+		if [ $max_tries -gt 0 ] && [ $num_tries -ge $max_tries ]; then
+			echo "$(date +'[%Y-%m-%d %H:%M:%S]') Stopping after $num_tries tries…" 1>&2;
 			return $exit_status;
 		fi;
 
 		# Sleep for a while.
 		echo;
 		local move_up="$(tput cuu1)" clear_line="$(tput el)";
-		num_seconds_left=$delay;
+		local num_seconds_left="$delay";
+		local start_timestamp="$(date +'%s')";
 		while [ $num_seconds_left -gt 0 ]; do
 			[ $num_seconds_left -eq 1 ] \
 				&& local time_unit=second \
 				|| local time_unit=seconds;
-			echo "${move_up}${clear_line}${exit_msg} Waiting for $num_seconds_left $time_unit after $num_tries tries…" 1>&2;
-			sleep 1;
-			let num_seconds_left--;
+			echo "${move_up}${clear_line}$(date +'[%Y-%m-%d %H:%M:%S]') ${exit_msg} Waiting for $num_seconds_left $time_unit after $num_tries tries… (Press Enter to retry immediately, or Ctrl+C to cancel entirely.)" 1>&2;
+			if read -t 1; then
+				num_seconds_left=0;
+			else
+				let num_seconds_left--;
+			fi;
 		done;
-		[ $delay -eq 1 ] \
+
+		# Show how long we actually waited before retrying.
+		local end_timestamp="$(date +'%s')";
+		local num_seconds_waited="$((end_timestamp - start_timestamp))";
+		[ $num_seconds_waited -eq 1 ] \
 			&& local time_unit=second \
 			|| local time_unit=seconds;
-		echo "${move_up}${clear_line}${exit_msg} Waited for $delay $time_unit. Retrying…" 1>&2;
+		echo "${move_up}$(date +'[%Y-%m-%d %H:%M:%S]') ${clear_line}${exit_msg} Waited for $num_seconds_waited $time_unit. Retrying…" 1>&2;
 
-		# Double the delay, but cap it at MAX_BB_DELAY.
+		# Double the delay, but cap it at the maximum.
 		let delay*=2;
 		[ $delay -gt $max_delay ] && delay=$max_delay;
 	done;
