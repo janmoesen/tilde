@@ -1,9 +1,10 @@
-#!/usr/bin/env awk -f
+#!/bin/sh
 #
 # Print the sum of the first number on every line of the given files, or STDIN.
 
-# You can leave out this section and just "print sum + 0" in END.
+awk '
 BEGIN {
+	# You can leave out this section and just "print sum + 0" in END.
 	sum = 0;
 	debug = 0;
 }
@@ -34,3 +35,4 @@ $1 ~ /^-?[0-9.]/ {
 END {
 	print sum;
 }
+' "$@";
