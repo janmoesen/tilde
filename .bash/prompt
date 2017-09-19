@@ -73,7 +73,7 @@ if [ "${TERM#xterm}" != "$TERM" -o "${TERM#screen}" != "$TERM" ]; then
 	title_string='\\W';
 
 	# When connected via SSH, show the hostname in the title, too.
-	[ -n "$SSH_CLIENT" ] \
+	[ -n "${SSH_CLIENT:-}" ] \
 		&& title_string="${HOSTNAME%.local}${__prompt_title_user_char} \W" \
 		|| title_string='\W';
 
