@@ -78,7 +78,7 @@ export HISTCONTROL=ignoredups;
 
 # Keep track of the time the commands were executed.
 # The xterm colour escapes require special care when piping; e.g. "| less -R".
-export HISTTIMEFORMAT="${FG_BLUE}${FONT_BOLD}%Y/%m/%d %H:%M:%S${FONT_RESET}  ";
+export HISTTIMEFORMAT="${FG_BLUE}${FONT_BOLD}%Y-%m-%d %H:%M:%S${FONT_RESET}  ";
 
 # Screen sessions
 # -----------------------------------------------------------------------------
