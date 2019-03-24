@@ -740,9 +740,24 @@ function viewlast {
 	(EDITOR=view vilast "$@");
 }
 
+# A quick way to show the last file in the Finder. See "vilast".
+function showlast {
+	(($#)) && show "${!#}";
+}
+
 # A quick way to "tail -f" the last file. See "vilast".
 function taillast {
 	(($#)) && tail -f "${!#}";
+}
+
+# A quick way to "cd" to the last directory. See "vilast".
+function cdlast {
+	for ((i = $#; i > 0; i--)); do
+		if [ -d "${!i}" ]; then
+			cd "${!i}";
+			return;
+		fi;
+	done;
 }
 
 # Keep executing the given command until it returns 0. If it did not,
