@@ -321,7 +321,7 @@ function process-tree {
 		# echo "PID: $pid // PPID: $ppid // CMD: $command" 1>&2;
 
 		# Stop when we have reached the first process, or an sshd/login process.
-		if [ -z "$ppid" -o "$ppid" -eq 0 -o "$ppid" -eq 1 -o "$command" = 'login' -o "$command" = 'sshd' ]; then
+		if [ -z "$ppid" ] || [ "$ppid" -eq 0 -o "$ppid" -eq 1 -o "$command" = 'login' -o "$command" = 'sshd' ]; then
 			# Include screen/xterm as the "root" process.
 			if [ "$command" = 'screen' -o "$command" = 'xterm' ]; then
 				commands=("$command" "${commands[@]}");
