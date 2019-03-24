@@ -1011,3 +1011,12 @@ function pause-with-countdown {
 		|| local time_unit=seconds;
 	echo "${move_up}${clear_line}$(date +"$timestamp_format") Waited for $num_seconds_waited $time_unit.";
 }
+
+# Print a text line inverted (i.e., invert the whole line on the screen, not
+# just the characters themselves). Lines that wrap (i.e., are longer than one
+# screen line) are only printed inverted up to and including the last
+# character, not the whole last line.
+function printinvln {
+	set -o nounset;
+	printf "$(tput rev)%-${COLUMNS:-$(tput cols)}s$(tput sgr0)\\n" "$*";
+}
