@@ -9,3 +9,6 @@ tags
 
 # OS X Finder turdlets
 *.DS_Store
+
+# Python virtualenv settings/libraries/…
+.virtualenv
