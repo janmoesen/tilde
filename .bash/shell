@@ -84,7 +84,7 @@ export HISTTIMEFORMAT="${FG_BLUE}${FONT_BOLD}%Y-%m-%d %H:%M:%S${FONT_RESET}  ";
 # -----------------------------------------------------------------------------
 # Enable SSH agent forwarding ("ForwardAgent yes"/"ssh -A") with persistent
 # screen sessions.
-if [ "$TERM" != 'screen' ]; then
+if [ "${TERM:0:6}" != 'screen' ]; then
 	# Persist the variable so we can source it in existing sessions.
 	if [ -n "$SSH_AUTH_SOCK" ]; then
 		if [ ! -d ~/.ssh ]; then
