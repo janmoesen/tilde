@@ -413,34 +413,6 @@ function diff-url () {(
 	done | colordiff | less -XFIRd;
 )}
 
-# Van Dale online dictionary look-up.
-function vd {
-	# Try to find the screen width. Make it a minimum of 40 so our awk
-	# patterns still match.
-	[ -z "$COLUMNS" ] && local COLUMNS="$(tput cols 2> /dev/null || echo 40)";
-	[ "$COLUMNS" -lt 40 ] && local COLUMNS=40;
-
-	# Dump the vandale.nl page. Because links does not support setting
-	# arbitrary headers or cookies, we hack the user agent string to include a
-	# newline and smuggle in our own Cookie: header.
-	lynx -dump -nolist -display_charset=UTF-8 -width="$COLUMNS" -useragent=$'Lynx\nCookie: country=nl' "http://www.vandale.nl/vandale/zoekService.do?selectedDictionary=nn&selectedDictionaryName=Nederlands&searchQuery=${*// /+}" |\
-		awk '
-			# This line is the first line after the word definition, so we
-			# can quit here.
-			/Gebruik dit woordenboek/ {
-				exit;
-			}
-
-			# Only print the interesting lines.
-			is_printing;
-
-			# Print everything after this line.
-			/Je hebt gezocht/ {
-				is_printing = 1;
-			}
-		';
-}
-
 # Edit the files found with the previous "ack" command using Vim (or the
 # default editor).
 function vack {
