@@ -15,12 +15,15 @@ echo "Getting the “before” state to \`$before_filename\`…";
 {
 	echo "${command[@]}";
 	"${command[@]}";
+	exit_status_before=$?;
 } 2>&1 > "$before_filename";
+
 
 read -p "Press Enter to save the “after” state to \`$after_filename\`… ";
 {
 	echo "${command[@]}";
 	"${command[@]}";
+	exit_status_after=$?;
 } 2>&1 > "$after_filename";
 
 ls -dalF "$before_filename" "$after_filename";
@@ -34,3 +37,9 @@ elif type -f colordiff 1>/dev/null 2>/dev/null; then
 fi;
 
 "${diff_command[@]}" -- "$before_filename" "$after_filename";
+
+if [ $exit_status_before -ne $exit_status_after ]; then
+	echo "The exit status before ($exit_status_before) differs from the exit status after ($exit_status_after).";
+fi;
+
+exit $exit_status_after;
