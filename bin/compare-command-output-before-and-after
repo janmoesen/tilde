@@ -1,0 +1,36 @@
+#!/bin/bash
+#
+# Compare the output of the give command before and after, waiting for you to
+# press Enter between the two states.
+#
+# E.g. to see what gets changed when tweaking macOS system settings:
+# `compare-command-output-before-and-after defaults read NSGlobalDomain`
+
+command=("$@");
+filename_prefix="$(mktemp -t "$(basename "$0")--$(basename "${command[0]}")")";
+before_filename="$filename_prefix.before";
+after_filename="$filename_prefix.after";
+
+echo "Getting the “before” state to \`$before_filename\`…";
+{
+	echo "${command[@]}";
+	"${command[@]}";
+} 2>&1 > "$before_filename";
+
+read -p "Press Enter to save the “after” state to \`$after_filename\`… ";
+{
+	echo "${command[@]}";
+	"${command[@]}";
+} 2>&1 > "$after_filename";
+
+ls -dalF "$before_filename" "$after_filename";
+
+diff_command=(diff -U0);
+
+if type -f git 1>/dev/null 2>/dev/null; then
+	diff_command=(git diff -U0 --no-index);
+elif type -f colordiff 1>/dev/null 2>/dev/null; then
+	diff_command=(colordiff -U0);
+fi;
+
+"${diff_command[@]}" -- "$before_filename" "$after_filename";
