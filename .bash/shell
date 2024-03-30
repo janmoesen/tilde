@@ -3,6 +3,9 @@
 # Shell options, environment variables and readline settings
 # =============================================================================
 
+# Make tabs 4 characters wide (default: 8).
+tabs -4;
+
 # Globbing and completion
 # -----------------------------------------------------------------------------
 # Case-insensitive globbing.
