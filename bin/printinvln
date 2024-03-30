@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Print a text line inverted (i.e., invert the whole line on the screen, not
+# just the characters themselves). Lines that wrap (i.e., are longer than one
+# screen line) are only printed inverted up to and including the last
+# character, not the whole last line.
+set -o nounset;
+printf "$(tput rev)%-${COLUMNS:-$(tput cols)}s$(tput sgr0)\\n" "$*";
