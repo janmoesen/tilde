@@ -367,7 +367,10 @@ defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 defaults write NSGlobalDomain com.apple.springing.enabled -bool true
 
 # Remove the spring loading delay for directories
-defaults write NSGlobalDomain com.apple.springing.delay -float 0
+# janmoesen: delay 0 is incredibly annoying when trying to move files using the
+# mouse by dropping them on another Finder tab. This setting also determines
+# the spring loading delay for those tabs.
+defaults write NSGlobalDomain com.apple.springing.delay -float 0.75
 
 # Avoid creating .DS_Store files on network or USB volumes
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
