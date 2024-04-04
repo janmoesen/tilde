@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Show the given file(s) in the Finder.
+# Default to the current directory.
+[ $# -eq 0 ] && set -- .;
+
+# Build the array of paths for AppleScript.
+paths=();
+for path; do
+	# Make sure each path exists.
+	if ! [ -e "$path" ]; then
+		echo "show: $path: No such file or directory";
+		continue;
+	fi;
+
+	# Crappily re-implement "readlink -f" ("realpath") for Darwin.
+	# (The "cd ... > /dev/null" hides CDPATH noise.)
+	[ -d "$path" ] \
+		&& path="$(cd -- "$path" > /dev/null && pwd)" \
+		|| path="$(cd -- "$(dirname -- "$path")" > /dev/null && \
+				 echo "$PWD/$(basename -- "$path")")";
+
+	paths+=("$path");
+done;
+[ "${#paths[@]}" -eq 0 ] && exit;
+
+paths_for_osascript='';
+# Group all output to pipe through osacript.
+{
+	echo 'tell application "Finder"';
+	echo -n 'select {'; # "reveal" would select only the last file.
+
+	# Use the “POSIX file "/path/to/file.ext"” AppleScript syntax.
+	printf -v paths_for_osascript $'POSIX file "%s", ' "${paths[@]//\"/\\\"}";
+	paths_for_osascript="${paths_for_osascript%$', '}";
+	printf '%s' "$paths_for_osascript";
+
+	echo '}';
+	echo 'activate';
+	echo 'end tell';
+} | osascript;
