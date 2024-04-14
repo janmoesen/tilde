@@ -180,6 +180,17 @@ defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool
 defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
+# janmoesen: disable Force Click and haptic feedback
+defaults write com.apple.AppleMultitouchTrackpad ActuateDetents -int 0
+defaults write com.apple.AppleMultitouchTrackpad ForceSuppressed -bool true
+
+# janmoesen: disable lookup and data detectors on three-finger tap
+defaults write com.apple.AppleMultitouchTrackpad TrackpadThreeFingerTapGesture -int 0
+defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerTapGesture -int 0
+
+# janmoesen: disable swipe between pages (e.g. in the browser)
+defaults write AppleEnableSwipeNavigateWithScrolls -bool false
+
 # Trackpad: map bottom right corner to right-click
 false && \
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadCornerSecondaryClick -int 2
